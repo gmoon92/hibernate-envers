@@ -1,0 +1,64 @@
+package com.moong.envers.common.config;
+
+import com.moong.envers.common.properties.PersistenceProperties;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.Properties;
+
+/**
+ * JPA Hibernate Config
+ * @author moong
+ */
+@Slf4j
+@Profile("local")
+@Configuration
+@EnableJpaAuditing
+@EnableTransactionManagement
+@EnableConfigurationProperties(PersistenceProperties.class)
+public class H2JPAConfig {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private PersistenceProperties persistenceProperties;
+
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+        final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource);
+        em.setPackagesToScan(new String[]{ "com.moong.envers.*.domain" });
+        em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        em.setJpaProperties(hibernateProperties());
+        return em;
+    }
+
+    @Bean
+    public JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
+        final JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory);
+        return transactionManager;
+    }
+
+    private Properties hibernateProperties() {
+        final Properties hibernateProperties = new Properties();
+        hibernateProperties.setProperty("hibernate.hbm2ddl.auto", persistenceProperties.getHbm2ddl().getAuto());
+        hibernateProperties.setProperty("hibernate.dialect", persistenceProperties.getDialect());
+        hibernateProperties.setProperty("hibernate.show_sql", persistenceProperties.getShowSql());
+        hibernateProperties.setProperty("hibernate.format_sql", persistenceProperties.getFormatSql());
+        hibernateProperties.setProperty("hibernate.use_sql_comments", persistenceProperties.getUseSqlComments());
+        return hibernateProperties;
+    }
+}
