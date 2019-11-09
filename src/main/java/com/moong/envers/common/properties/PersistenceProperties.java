@@ -22,8 +22,15 @@ public class PersistenceProperties {
 
     private Hbm2ddl hbm2ddl;
 
+    private Envers envers;
+
     @Getter @Setter
     public static class Hbm2ddl {
         private String auto;
+    }
+
+    @Getter @Setter
+    public static class Envers {
+        private String auditTableSuffix;
     }
 }

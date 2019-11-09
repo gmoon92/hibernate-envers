@@ -59,6 +59,7 @@ public class H2JPAConfig {
         hibernateProperties.setProperty("hibernate.show_sql", persistenceProperties.getShowSql());
         hibernateProperties.setProperty("hibernate.format_sql", persistenceProperties.getFormatSql());
         hibernateProperties.setProperty("hibernate.use_sql_comments", persistenceProperties.getUseSqlComments());
+        hibernateProperties.setProperty("org.hibernate.envers.audit_table_suffix", persistenceProperties.getEnvers().getAuditTableSuffix());
         return hibernateProperties;
     }
 }
