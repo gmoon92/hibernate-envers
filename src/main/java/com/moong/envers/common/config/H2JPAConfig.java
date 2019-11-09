@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -15,10 +16,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
  * JPA Hibernate Config
+ *
  * @author moong
  */
 @Slf4j
@@ -50,6 +53,18 @@ public class H2JPAConfig {
         final JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;
+    }
+
+    // todo : AuditorAware 의 구현체 객체 생성
+    //  스프링 시큐리티를 사용하여 로그인한 유저를 반환하는 로직 개발하기
+    @Bean
+    public AuditorAware<String> auditorProvider() {
+        return new AuditorAware<String>() {
+            @Override
+            public Optional<String> getCurrentAuditor() {
+                return Optional.of("gmun.github.io");
+            }
+        };
     }
 
     private Properties hibernateProperties() {
