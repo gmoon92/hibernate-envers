@@ -32,6 +32,8 @@ import java.util.Properties;
 @EnableConfigurationProperties(PersistenceProperties.class)
 public class H2JPAConfig {
 
+    public final static String PERSISTENCE_UNIT_NAME = "defaultUnit";
+
     @Autowired
     private DataSource dataSource;
 
@@ -41,6 +43,7 @@ public class H2JPAConfig {
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setPersistenceUnitName(PERSISTENCE_UNIT_NAME);
         em.setDataSource(dataSource);
         em.setPackagesToScan(new String[]{ "com.moong.envers.*.domain" });
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
