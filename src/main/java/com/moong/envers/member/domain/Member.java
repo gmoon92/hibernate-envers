@@ -12,6 +12,7 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -20,7 +21,7 @@ import javax.persistence.ManyToOne;
 @Audited
 @Entity
 @Getter @Setter
-@ToString @EqualsAndHashCode(of = {"id", "name"})
+@ToString(exclude = {"team"}) @EqualsAndHashCode(of = {"id", "name"})
 @NoArgsConstructor
 public class Member extends BaseEntity {
 
@@ -47,8 +48,9 @@ public class Member extends BaseEntity {
      *  참고로 Team은 FK로 추적된다.
      *
      * Team 자체의 FK 까지 추적할 의미가 없다고 판단하여 @NotAudited 사용했다.
+     * @author moong
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TEAM_ID")
     @NotAudited
     private Team team;

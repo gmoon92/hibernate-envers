@@ -58,12 +58,18 @@ public class RevisionHistory implements Serializable {
 
     private String updatedByUsername;
 
-    @OneToMany(mappedBy = "revisionHistory",cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+    /**
+     * 일반적으로 각 Revision에서 변경된 Entity Type을 추적하지 않는다.
+     * 수정된 Entity 이름을 추적하는 세 가지 방법으로 활성화할 수 있다.
+     * 1) @org.hibernate.envers.ModifiedEntityNames 애노테이션 방식 : Property는 Set<String> 유형이어야한다.
+     * https://docs.jboss.org/hibernate/core/4.1/devguide/en-US/html/ch15.html#envers-tracking-properties-changes
+     */
+    @OneToMany(mappedBy = "revision",cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private Set<RevisionHistoryModified> modifiedEntities = new HashSet<>();
 
     public void addModifiedEntity(Serializable entityId, RevisionType revisionType, RevisionTarget revisionTarget, RevisionEventStatus eventStatus) {
         modifiedEntities.add(RevisionHistoryModified.builder()
-                .revisionHistory(this)
+                .revision(this)
                 .entityId(entityId)
                 .revisionEventStatus(eventStatus)
                 .revisionTarget(revisionTarget)

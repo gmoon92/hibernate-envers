@@ -20,7 +20,7 @@ public class SpringBootH2IntegrationTest {
 
     @Test
     @Transactional
-    public void givenRepository_whenSaveAndRetreiveEntity(){
+    public void givenRepository_whenSaveAndRetrieveEntity(){
         Member member = memberRepository.save(Member.builder().name("moong").build());
         Member findMember = memberRepository.findById(member.getId()).get();
 
