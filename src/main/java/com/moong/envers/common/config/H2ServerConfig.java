@@ -18,7 +18,7 @@ public class H2ServerConfig {
 
     /**
      * @apiNote H2 TCP Server Config
-     * @autor moong
+     * @author moong
      */
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2TcpServer() throws SQLException {
@@ -33,7 +33,7 @@ public class H2ServerConfig {
      * 현재 프로젝트는 2.2.1 이기 때문에 HikariCP를 사용.
      * spring.datasource로 값을 설정하기 보다는
      * spring.datasource.hikari로 수동/자동 구분없이 설정해야됌
-     * @autor moong
+     * @author moong
      */
     @Bean
     @ConfigurationProperties("spring.datasource.hikari")

@@ -9,6 +9,12 @@ import org.hibernate.envers.RevisionType;
 
 import java.io.Serializable;
 
+
+/**
+ * @author moong
+ * https://docs.jboss.org/hibernate/core/4.0/devguide/en-US/html/ch15.html
+ * https://github.com/hibernate/hibernate-orm/blob/master/documentation/src/test/java/org/hibernate/userguide/envers/EntityTypeChangeAuditTrackingRevisionListenerTest.java
+ */
 @Slf4j
 public class RevisionHistoryListener implements EntityTrackingRevisionListener {
 

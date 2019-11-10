@@ -3,6 +3,7 @@ package com.moong.envers.envers.domain;
 import com.moong.envers.envers.types.RevisionEventStatus;
 import com.moong.envers.envers.types.RevisionTarget;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.envers.RevisionType;
 
@@ -20,6 +21,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "rev_history_modified")
 @NoArgsConstructor
+@Getter
 public class RevisionHistoryModified {
 
     @Id
@@ -28,7 +30,7 @@ public class RevisionHistoryModified {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "revision_number")
-    private RevisionHistory revisionHistory;
+    private RevisionHistory revision;
 
     @Column(name = "entity_id", updatable = false, nullable = false)
     private String entityId;
@@ -46,8 +48,8 @@ public class RevisionHistoryModified {
     private RevisionEventStatus revisionEventStatus;
 
     @Builder
-    private RevisionHistoryModified(RevisionHistory revisionHistory, Serializable entityId, RevisionTarget revisionTarget, RevisionType revisionType, RevisionEventStatus revisionEventStatus) {
-        this.revisionHistory = revisionHistory;
+    private RevisionHistoryModified(RevisionHistory revision, Serializable entityId, RevisionTarget revisionTarget, RevisionType revisionType, RevisionEventStatus revisionEventStatus) {
+        this.revision = revision;
         this.entityId = revisionTarget.convertToRevisionEntityID(entityId);
         this.revisionTarget = revisionTarget;
         this.revisionType = revisionType;
