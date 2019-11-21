@@ -30,7 +30,7 @@ import java.util.Properties;
 @EnableJpaAuditing
 @EnableTransactionManagement
 @EnableConfigurationProperties(PersistenceProperties.class)
-public class H2JPAConfig {
+public class JPAConfig {
 
     public final static String PERSISTENCE_UNIT_NAME = "defaultUnit";
 

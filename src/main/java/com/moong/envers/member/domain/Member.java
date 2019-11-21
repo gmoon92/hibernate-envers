@@ -2,11 +2,11 @@ package com.moong.envers.member.domain;
 
 import com.moong.envers.common.domain.BaseEntity;
 import com.moong.envers.team.domain.Team;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
@@ -20,9 +20,9 @@ import javax.persistence.ManyToOne;
 
 @Audited
 @Entity
-@Getter @Setter
+@Getter
 @ToString(exclude = {"team"}) @EqualsAndHashCode(of = {"id", "name"})
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends BaseEntity {
 
     @Id

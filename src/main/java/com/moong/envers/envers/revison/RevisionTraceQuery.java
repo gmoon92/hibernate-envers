@@ -1,6 +1,7 @@
 package com.moong.envers.envers.revison;
 
 import com.moong.envers.common.domain.BaseEntity;
+import com.moong.envers.envers.config.exception.RevisionException;
 import com.moong.envers.envers.domain.RevisionHistoryModified;
 import com.moong.envers.envers.types.RevisionTarget;
 import com.querydsl.jpa.JPAExpressions;
@@ -19,47 +20,46 @@ import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHi
 @Slf4j
 public class RevisionTraceQuery {
 
-  private final EntityManager em;
+    private final EntityManager em;
 
-  public RevisionTraceQuery(EntityManager em) {
-    this.em = em;
-  }
-
-  public Object getEntityAud(Long revisionNumber, String entityId, Class<? extends BaseEntity> entityClass) {
-    try {
-      RevisionTarget target = RevisionTarget.of(entityClass);
-      return AuditReaderFactory.get(em)
-              .createQuery()
-              .forEntitiesModifiedAtRevision(entityClass, revisionNumber)
-              .add(AuditEntity.id().eq(target.convertToEntityID(entityId)))
-              .getSingleResult();
-    } catch (Exception e) {
-      log.warn("Not select entity aud... revisionNumber : {}, entityId : {}, target : {}", revisionNumber, entityId, entityClass, e.fillInStackTrace());
-      return null;
+    public RevisionTraceQuery(EntityManager em) {
+        this.em = em;
     }
-  }
 
-  public Optional<RevisionHistoryModified> getPreModifiedRevision(RevisionHistoryModified revision) {
-    JPAQuery<RevisionHistoryModified> query = new JPAQuery(em);
+    public Object getEntityAud(Long revNumber, String entityId, Class<? extends BaseEntity> entityClass) {
+        try {
+            RevisionTarget target = RevisionTarget.of(entityClass);
+            return AuditReaderFactory.get(em)
+                    .createQuery()
+                    .forEntitiesModifiedAtRevision(entityClass, revNumber)
+                    .add(AuditEntity.id().eq(target.convertToEntityID(entityId)))
+                    .getSingleResult();
+        } catch (Exception ex) {
+            throw new RevisionException(ex, "Not found revision... Revision Number : %s, entityClass : %s, entityId : %s", revNumber, entityClass, entityId);
+        }
+    }
 
-    query.select(revisionHistoryModified)
-         .from(revisionHistory)
-            .innerJoin(revisionHistory.modifiedEntities, revisionHistoryModified)
-            .where(revisionHistoryModified.revision.id.eq(JPAExpressions.select(revisionHistory.id.max())
-                    .from(revisionHistory)
-                    .innerJoin(revisionHistory.modifiedEntities, revisionHistoryModified)
-                    .where(revisionHistoryModified.entityId.eq(revision.getEntityId())
-                            .and(revisionHistoryModified.revisionTarget.eq(revision.getRevisionTarget()))
-                            .and(revisionHistoryModified.revision.id.lt(revision.getRevision().getId())))));
-    return Optional.ofNullable(query.fetchOne());
-  }
+    public Optional<RevisionHistoryModified> getPreModifiedRevision(RevisionHistoryModified revision) {
+        JPAQuery<RevisionHistoryModified> query = new JPAQuery(em);
 
-  public List<RevisionHistoryModified> getModifiedEntities(Long revisionNumber, RevisionTarget target) {
-    JPAQuery<RevisionHistoryModified> query = new JPAQuery(em);
-    return query.select(revisionHistoryModified)
-            .from(revisionHistoryModified)
-            .where(revisionHistoryModified.revision.id.eq(revisionNumber)
-                    .and(revisionHistoryModified.revisionTarget.eq(target)))
-            .fetch();
-  }
+        query.select(revisionHistoryModified)
+                .from(revisionHistory)
+                .innerJoin(revisionHistory.modifiedEntities, revisionHistoryModified)
+                .where(revisionHistoryModified.revision.id.eq(JPAExpressions.select(revisionHistory.id.max())
+                        .from(revisionHistory)
+                        .innerJoin(revisionHistory.modifiedEntities, revisionHistoryModified)
+                        .where(revisionHistoryModified.entityId.eq(revision.getEntityId())
+                                .and(revisionHistoryModified.revisionTarget.eq(revision.getRevisionTarget()))
+                                .and(revisionHistoryModified.revision.id.lt(revision.getRevision().getId())))));
+        return Optional.ofNullable(query.fetchOne());
+    }
+
+    public List<RevisionHistoryModified> getModifiedEntities(Long revisionNumber, RevisionTarget target) {
+        JPAQuery<RevisionHistoryModified> query = new JPAQuery(em);
+        return query.select(revisionHistoryModified)
+                .from(revisionHistoryModified)
+                .where(revisionHistoryModified.revision.id.eq(revisionNumber)
+                        .and(revisionHistoryModified.revisionTarget.eq(target)))
+                .fetch();
+    }
 }

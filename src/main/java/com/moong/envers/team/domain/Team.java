@@ -1,10 +1,10 @@
 package com.moong.envers.team.domain;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
@@ -12,9 +12,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-@Getter @Setter
+@Getter
 @ToString @EqualsAndHashCode(of = {"id", "name"})
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Team {
 
     @Id
@@ -28,3 +28,5 @@ public class Team {
         this.name = name;
     }
 }
+
+
