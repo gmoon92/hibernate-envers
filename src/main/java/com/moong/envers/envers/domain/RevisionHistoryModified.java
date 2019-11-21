@@ -2,9 +2,12 @@ package com.moong.envers.envers.domain;
 
 import com.moong.envers.envers.types.RevisionEventStatus;
 import com.moong.envers.envers.types.RevisionTarget;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.envers.RevisionType;
 
 import javax.persistence.Column;
@@ -20,8 +23,9 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "rev_history_modified")
-@NoArgsConstructor
 @Getter
+@ToString @EqualsAndHashCode(of = {"revision", "entityId", "revisionTarget"})
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RevisionHistoryModified {
 
     @Id
@@ -57,3 +61,4 @@ public class RevisionHistoryModified {
     }
 
 }
+

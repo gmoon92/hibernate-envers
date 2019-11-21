@@ -3,10 +3,10 @@ package com.moong.envers.envers.domain;
 import com.moong.envers.envers.config.RevisionHistoryListener;
 import com.moong.envers.envers.types.RevisionEventStatus;
 import com.moong.envers.envers.types.RevisionTarget;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
@@ -32,10 +32,9 @@ import java.util.Set;
 @Entity
 @Table(name = "rev_history")
 @RevisionEntity(RevisionHistoryListener.class)
-@Getter @Setter
-@ToString(exclude = {"modifiedEntities"})
-@EqualsAndHashCode(of = {"id"}, exclude = {"modifiedEntities"})
-@NoArgsConstructor
+@Getter
+@ToString(exclude = { "modifiedEntities" }) @EqualsAndHashCode(of = { "id" }, exclude = { "modifiedEntities" })
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RevisionHistory implements Serializable {
 
     @Id
@@ -64,7 +63,7 @@ public class RevisionHistory implements Serializable {
      * 1) @org.hibernate.envers.ModifiedEntityNames 애노테이션 방식 : Property는 Set<String> 유형이어야한다.
      * https://docs.jboss.org/hibernate/core/4.1/devguide/en-US/html/ch15.html#envers-tracking-properties-changes
      */
-    @OneToMany(mappedBy = "revision",cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
+    @OneToMany(mappedBy = "revision", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private Set<RevisionHistoryModified> modifiedEntities = new HashSet<>();
 
     public void addModifiedEntity(Serializable entityId, RevisionType revisionType, RevisionTarget revisionTarget, RevisionEventStatus eventStatus) {
