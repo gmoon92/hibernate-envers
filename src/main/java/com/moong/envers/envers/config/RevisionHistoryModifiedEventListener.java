@@ -17,6 +17,9 @@ import javax.persistence.EntityTransaction;
 import java.util.Optional;
 
 import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
+import static com.moong.envers.envers.types.RevisionEventStatus.ERROR;
+import static com.moong.envers.envers.types.RevisionEventStatus.NOT_SUITABLE;
+import static com.moong.envers.envers.types.RevisionEventStatus.SUITABLE;
 
 @Slf4j
 public class RevisionHistoryModifiedEventListener implements PostInsertEventListener {
@@ -36,40 +39,45 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
             log.info("PostInsertEventListener start...");
 
 //            EntityManager em = event.getSession().getEntityManagerFactory().createEntityManager();
-            RevisionHistoryModified modifiedRevision = (RevisionHistoryModified) entity;
+            RevisionHistoryModified revModified = RevisionHistoryModified.class.cast(entity);
 
-            Long revisionNumber = modifiedRevision.getRevision().getId();
+            Long revNumber = revModified.getRevision().getId();
+            Long revModifiedId = revModified.getId();
 
-            RevisionTarget revisionTarget = modifiedRevision.getRevisionTarget();
-            Class entityClass = revisionTarget.getEntityClass();
-            String entityId = modifiedRevision.getEntityId();
-            
-            Object currentEntity = traceQuery.getEntityAud(revisionNumber, entityId, entityClass);
+            RevisionTarget revTarget = revModified.getRevisionTarget();
+            Class entityClass = revTarget.getEntityClass();
+            String entityId = revModified.getEntityId();
 
-            Optional<RevisionHistoryModified> beforeRevisionModified = traceQuery.getPreModifiedRevision(modifiedRevision);
-            RevisionEventStatus eventStatus = RevisionEventStatus.SUITABLE;
+            RevisionEventStatus eventStatus = SUITABLE;
+            String targetUserId = null;
+            String targetAgentId = null;
 
-            if (beforeRevisionModified.isPresent()) {
-                RevisionHistoryModified before = beforeRevisionModified.get();
-                Long beforeRevisionNumber = before.getRevision().getId();
-                String beforeEntityId = before.getEntityId();
+            try {
+                Object currentEntity = traceQuery.getEntityAud(revNumber, entityId, entityClass);
 
-                Object beforeEntity = traceQuery.getEntityAud(beforeRevisionNumber, beforeEntityId, entityClass);
+                Optional<RevisionHistoryModified> beforeRevisionModified = traceQuery.getPreModifiedRevision(revModified);
 
-                if (isCompareToEntity(currentEntity, beforeEntity, revisionTarget)) {
-                    eventStatus = RevisionEventStatus.NOT_SUITABLE;
+                if (beforeRevisionModified.isPresent()) {
+                    RevisionHistoryModified before = beforeRevisionModified.get();
+                    Long beforeRevisionNumber = before.getRevision().getId();
+                    String beforeEntityId = before.getEntityId();
+
+                    Object beforeEntity = traceQuery.getEntityAud(beforeRevisionNumber, beforeEntityId, entityClass);
+
+                    if (isCompareToEntity(currentEntity, beforeEntity, revTarget)) {
+                        eventStatus = NOT_SUITABLE;
+                    }
                 }
+                targetUserId = String.valueOf(getTargetUserId(em, currentEntity, entityId, revTarget));
+                targetAgentId = String.valueOf(getTargetTeamId(em, currentEntity, entityId, revTarget));
+            } catch (Exception ex) {
+                eventStatus = ERROR;
+                log.error("[ERR] onPostInsert occur", ex);
+            } finally {
+                updateRevisionModifiedEntity(em, revModifiedId, eventStatus, targetAgentId, targetUserId);
             }
-
-            Long revisionModifiedEntityId = modifiedRevision.getId();
-
-            String targetUserId = String.valueOf(getTargetUserId(em, currentEntity, entityId, revisionTarget));
-            String targetAgentId = String.valueOf(getTargetTeamId(em, currentEntity, entityId, revisionTarget));
-
-            updateRevisionModifiedEntity(em, revisionModifiedEntityId, eventStatus, targetAgentId, targetUserId);
         }
     }
-
 
     private Object getTargetUserId(EntityManager em, Object entity, String entityId, RevisionTarget target) {
         switch (target) {
