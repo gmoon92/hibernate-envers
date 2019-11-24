@@ -13,6 +13,7 @@ import org.hibernate.envers.NotAudited;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -51,7 +52,7 @@ public class Member extends BaseEntity {
      * @author moong
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TEAM_ID")
+    @JoinColumn(name = "team_id", foreignKey = @ForeignKey(name = "fk_member_team_id"))
     @NotAudited
     private Team team;
 
