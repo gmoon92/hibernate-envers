@@ -35,11 +35,10 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         memberRepository.deleteAll();
         teamRepository.deleteAll();
 
-        team = teamRepository.save(Team.newTeam("웹개발1팀"));
+        team = teamRepository.save(Team.newTeam("web1"));
         member = memberRepository.save(Member.builder()
                 .team(team)
-                .name("Moon")
-                .password("test")
+                .name("moon")
                 .age(92)
                 .build());
     }
