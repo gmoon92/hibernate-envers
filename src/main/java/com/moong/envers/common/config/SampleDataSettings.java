@@ -23,7 +23,7 @@ public class SampleDataSettings implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Sample Data settings...");
         Team team = teamRepository.findByName("web1")
-                .orElse(teamRepository.save(Team.builder().name("web1").build()));
+                .orElseGet(() -> teamRepository.save(Team.newTeam("web1")));
         memberRepository.findByName("admin")
                 .orElseGet(() -> memberRepository.save(Member.builder().name("admin").team(team).build()));
     }

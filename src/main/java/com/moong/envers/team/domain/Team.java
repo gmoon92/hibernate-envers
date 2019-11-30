@@ -23,9 +23,13 @@ public class Team {
 
     private String name;
 
-    @Builder
+    @Builder(access = AccessLevel.PROTECTED)
     private Team(String name) {
         this.name = name;
+    }
+
+    public static Team newTeam(String name) {
+        return Team.builder().name(name).build();
     }
 }
 
