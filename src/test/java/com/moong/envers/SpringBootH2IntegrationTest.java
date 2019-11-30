@@ -21,7 +21,7 @@ class SpringBootH2IntegrationTest {
     @Test
     @Transactional
     void givenRepository_whenSaveAndRetrieveEntity(){
-        Member member = memberRepository.save(Member.builder().name("moong").build());
+        Member member = memberRepository.save(Member.builder().name("moon").build());
         Member findMember = memberRepository.findById(member.getId()).get();
 
         Assertions.assertThat(member).isNotNull().isEqualTo(findMember);
