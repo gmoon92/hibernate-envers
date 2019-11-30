@@ -1,8 +1,9 @@
 package com.moong.envers.common.config;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestConstructor;
 
 import javax.persistence.EntityManager;
@@ -10,10 +11,11 @@ import javax.persistence.PersistenceContext;
 
 import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
 
-@Slf4j
 @DataJpaTest
+@Import(QueryDslConfig.class)
+@ActiveProfiles("test")
 @TestConstructor(autowireMode = ALL)
-public abstract class BaseJPARepositoryTestCase {
+public abstract class BaseJPARepositoryTestCase extends BaseTestCase {
 
     @PersistenceContext(name = JPAConfig.PERSISTENCE_UNIT_NAME)
     public EntityManager em;
@@ -24,6 +26,7 @@ public abstract class BaseJPARepositoryTestCase {
     }
 
     protected void doEntityManagerFlushAndClear() {
+        log.trace("Do action Entity manager flush and clear...");
         em.flush();
         em.clear();
     }
