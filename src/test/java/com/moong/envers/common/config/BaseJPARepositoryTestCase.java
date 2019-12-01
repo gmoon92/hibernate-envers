@@ -1,6 +1,8 @@
 package com.moong.envers.common.config;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,7 +20,10 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
 public abstract class BaseJPARepositoryTestCase extends BaseTestCase {
 
     @PersistenceContext(name = JPAConfig.PERSISTENCE_UNIT_NAME)
-    public EntityManager em;
+    protected EntityManager em;
+
+    @Autowired
+    protected JPAQueryFactory jpaQueryFactory;
 
     @AfterEach
     public void cleanEntityManager() {

@@ -1,46 +1,40 @@
 package com.moong.envers.envers.revison;
 
-import com.moong.envers.common.config.JPAConfig;
-import com.moong.envers.envers.domain.RevisionHistory;
+import com.moong.envers.common.config.BaseJPARepositoryTestCase;
+import com.moong.envers.common.config.SampleDataSettings;
+import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
-import com.querydsl.jpa.impl.JPAQuery;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
-import static com.moong.envers.envers.domain.QRevisionHistory.revisionHistory;
+import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
 import static com.moong.envers.member.domain.QMember.member;
 
-@Slf4j
-@SpringBootTest
-class RevisionTraceQueryTest {
+@Import( { SampleDataSettings.class })
+class RevisionTraceQueryTest extends BaseJPARepositoryTestCase {
 
-    @PersistenceContext(unitName = JPAConfig.PERSISTENCE_UNIT_NAME)
-    private EntityManager em;
-
-    private Long rev;
     private Long entityId;
+    private Long rev;
 
     @BeforeEach
     void init() {
-        entityId = new JPAQuery<Member>(em)
-                .select(member.id.max())
+        entityId = jpaQueryFactory.select(member.id.max())
                 .from(member)
                 .fetchOne();
-        rev = new JPAQuery<RevisionHistory>(em)
-                .select(revisionHistory.id.max())
-                .from(revisionHistory)
+        rev = jpaQueryFactory.select(revisionHistoryModified.revision.id.max())
+                .from(revisionHistoryModified)
+                .where(revisionHistoryModified.entityId.eq(String.valueOf(entityId))
+                        .and(revisionHistoryModified.revisionTarget.eq(RevisionTarget.MEMBER)))
                 .fetchOne();
+
+        log.info("entity id : {}, rev : {}", entityId, rev);
     }
 
     @Test
@@ -55,7 +49,7 @@ class RevisionTraceQueryTest {
 
 //        query 사용시 해당 rev 없다면, 예외 발생 javax.persistence.NoResultException
 //        [2] RevisionType 제어 가능 조회
-        Member memberAud2 = (Member)auditReader.createQuery()
+        Member memberAud2 = (Member) auditReader.createQuery()
                 .forRevisionsOfEntity(Member.class, true, false)
                 .add(AuditEntity.revisionNumber().eq(rev))
                 .add(AuditEntity.id().eq(entityId))
