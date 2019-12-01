@@ -1,5 +1,6 @@
 package com.moong.envers.approve.domain;
 
+import com.moong.envers.applyForm.domain.ApplyForm;
 import com.moong.envers.approve.types.ApproveStatus;
 import com.moong.envers.common.domain.BaseEntity;
 import com.moong.envers.member.domain.Member;
@@ -44,7 +45,6 @@ public class Approve extends BaseEntity {
     @MapsId("memberId")
     @ManyToOne(optional = false)
     @JoinColumn(name = "member_id", updatable = false, insertable = false, foreignKey = @ForeignKey(name = "fk_approve_member_id"))
-    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Member member;
 
     /**
@@ -62,6 +62,10 @@ public class Approve extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ApproveStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "apply_form_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_approve_apply_form_id"))
+    private ApplyForm applyForm;
 
     @Builder(access = AccessLevel.PROTECTED)
     private Approve(Id id, Member member, Team team, ApproveStatus status) {
