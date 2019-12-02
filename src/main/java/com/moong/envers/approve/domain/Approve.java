@@ -75,7 +75,7 @@ public class Approve extends BaseEntity {
         this.status = status;
     }
 
-    public static Approve newInstance(Member member, Team team) {
+    public static Approve register(Member member, Team team) {
         return Approve.builder()
                 .id(Id.builder()
                         .memberId(member.getId())

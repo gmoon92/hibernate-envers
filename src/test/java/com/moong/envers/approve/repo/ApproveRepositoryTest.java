@@ -4,7 +4,9 @@ import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.approve.types.ApproveStatus;
 import com.moong.envers.common.config.BaseJPARepositoryTestCase;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.member.domain.QMember;
 import com.moong.envers.member.repo.MemberRepository;
+import com.moong.envers.team.domain.QTeam;
 import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
@@ -17,7 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Example;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+
+import static com.moong.envers.approve.domain.QApprove.approve;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -29,6 +34,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
 
     private Member member;
     private Team team;
+    private Team team2;
 
     @BeforeEach
     void init() {
@@ -36,18 +42,49 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         teamRepository.deleteAll();
 
         team = teamRepository.save(Team.newTeam("web1"));
+        team2 = teamRepository.save(Team.newTeam("web2"));
         member = memberRepository.save(Member.builder()
                 .team(team)
                 .name("moon")
-                .age(92)
                 .build());
+        doEntityManagerFlushAndClear();
+    }
+
+    @Test
+    @DisplayName("N+1 query 개선")
+    void testRetrieveApproveMember() {
+        saveSampleApprove();
+        log.info(">>>>>>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>>>>>>");
+//        N+1 발생
+        List<Approve> approveMembers = approveRepository.findByMember(member);
+        log.info("approveMembers {} : {}", approveMembers.size(), approveMembers);
+        doEntityManagerFlushAndClear();
+
+        log.info(">>>>>>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>>>>>>");
+//        fetch join으로 개선
+        List<Approve> testList = jpaQueryFactory.select(approve)
+                .from(approve)
+                .leftJoin(approve.member, QMember.member).fetchJoin()
+                .leftJoin(approve.team, QTeam.team).fetchJoin()
+                .fetch();
+        log.info("testList {} : {}", testList.size(), testList);
+        Approve approveMember = approveRepository.findByMemberAndTeam(member, member.getTeam());
+        log.info("approveMember : {} ", approveMember);
+    }
+
+    public void saveSampleApprove() {
+        approveRepository.save(Approve.register(member, team));
+        approveRepository.save(Approve.register(member, team2));
+        doEntityManagerFlushAndClear();
     }
 
     @Test
     @DisplayName("다대다 저장 연습")
     void testManyToManySave() {
 //      [1] 저장
-        Approve saveApprove = approveRepository.save(Approve.newInstance(member, team));
+        Approve saveApprove = approveRepository.save(Approve.register(member, team));
         Assertions.assertThat(saveApprove.getStatus())
                 .isEqualTo(ApproveStatus.WAIT);
         doEntityManagerFlushAndClear();
@@ -67,12 +104,12 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
          * @author moong
          * */
 //      [3] findOne 테스트
-        Example<Approve> example = Example.of(Approve.newInstance(member, team).changeApproveStatus(ApproveStatus.ASSENT));
+        Example<Approve> example = Example.of(Approve.register(member, team).changeApproveStatus(ApproveStatus.ASSENT));
         Optional<Approve> findOneApprove = approveRepository.findOne(example);
         findOneApprove.ifPresent(approve -> {
             log.info("findOneApprove : {}", approve);
             Assertions.assertThat(approve)
-                    .isEqualTo(Approve.newInstance(member,team).changeApproveStatus(ApproveStatus.ASSENT));
+                    .isEqualTo(Approve.register(member,team).changeApproveStatus(ApproveStatus.ASSENT));
         });
     }
 

@@ -43,8 +43,8 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
         memberRepository.saveAll(Arrays.asList(kim, lee, moon, jts, newcomer1, newcomer2));
 
         approveRepository.saveAll(Arrays.asList(
-                 Approve.newInstance(kim, web1)
-                ,Approve.newInstance(lee, web1)
+                 Approve.register(kim, web1)
+                ,Approve.register(lee, web1)
         ));
         doEntityManagerFlushAndClear();
         log.info("\n\n\n\n");
