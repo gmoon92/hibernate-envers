@@ -1,6 +1,7 @@
 package com.moong.envers.approve.repo;
 
 import com.moong.envers.approve.domain.Approve;
+import com.moong.envers.approve.domain.QApprove;
 import com.moong.envers.approve.types.ApproveStatus;
 import com.moong.envers.common.config.BaseJPARepositoryTestCase;
 import com.moong.envers.member.domain.Member;
@@ -21,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.moong.envers.approve.domain.QApprove.approve;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -50,6 +49,26 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         doEntityManagerFlushAndClear();
     }
 
+
+    /**
+     * N+1 발생 해결 방법
+     * 1. 엔티티 글로벌 패치 전략 변경
+     *  @*One 연관 관계의 글로벌 패치 전략은 기본적으로 EAGER 타입이다.
+     *  해당 엔티티를 Lazy로 변경하면 조회할 당시 Proxy 객체로 조회하기 때문에
+     *  조회 대상에서 일시적으로 제외됨을 확인할 수 있다.
+     *  하지만 근본적인 해결책은 아니다.
+     *  결과적으로 해당 객체를 사용할 시점에 Proxy 객체가 초기화 되면서 N+1 이 발생할 수 있다.
+     *
+     * 2. JPQL의 패러다임 - fetch join
+     *  두 번째 해결 방법은 fetch join이다.
+     *  조회 시점에 N + 1 이 발생할 수 있는 연관 관계를 엔티티를 조인하여 한번에 가져오는 방법이 있다.
+     *  하지만 이 방식도 단점이 존재한다.
+     *  2.1. 메모리 문제
+     *  2.2. 추가로 관리할 메서드가 증가함에 따른 Repository의 복잡성
+     * N+1에 대해 명확한 정리를 할 필요가 있다.
+     * 본 코드에선 엔티티에 대한 Lazy 처리와 fetch join 에 대해 두 가지 방식을 적용했다.
+     * @author moong
+     */
     @Test
     @DisplayName("N+1 query 개선")
     void testRetrieveApproveMember() {
@@ -63,13 +82,16 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
 
         log.info(">>>>>>>>>>>>>>>>>");
         log.info(">>>>>>>>>>>>>>>>>");
-//        fetch join으로 개선
-        List<Approve> testList = jpaQueryFactory.select(approve)
-                .from(approve)
-                .leftJoin(approve.member, QMember.member).fetchJoin()
-                .leftJoin(approve.team, QTeam.team).fetchJoin()
+//        fetchJoin + FetchType.Lazy 으로 해결
+        List<Approve> testList = jpaQueryFactory.select(QApprove.approve)
+                .from(QApprove.approve)
+                .leftJoin(QApprove.approve.member, QMember.member).fetchJoin()
+                .leftJoin(QApprove.approve.team, QTeam.team).fetchJoin()
                 .fetch();
+
         log.info("testList {} : {}", testList.size(), testList);
+
+//        단일 건은 이상 없음
         Approve approveMember = approveRepository.findByMemberAndTeam(member, member.getTeam());
         log.info("approveMember : {} ", approveMember);
     }

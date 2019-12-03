@@ -5,9 +5,6 @@ import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface ApproveRepository extends JpaRepository<Approve, Approve.Id> {
-    List<Approve> findByMember(Member approveMember);
+public interface ApproveRepository extends JpaRepository<Approve, Approve.Id>, ApproveRepositoryCustom {
     Approve findByMemberAndTeam(Member approveMember, Team approveTeam);
 }
