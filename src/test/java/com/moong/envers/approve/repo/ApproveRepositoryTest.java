@@ -71,7 +71,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
      */
     @Test
     @DisplayName("N+1 query 개선")
-    void testRetrieveApproveMember() {
+    void testNPlushOneProblem() {
         saveSampleApprove();
         log.info(">>>>>>>>>>>>>>>>>");
         log.info(">>>>>>>>>>>>>>>>>");
