@@ -22,6 +22,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -43,7 +44,7 @@ public class Approve extends BaseEntity {
     private Id id;
 
     @MapsId("memberId")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", updatable = false, insertable = false, foreignKey = @ForeignKey(name = "fk_approve_member_id"))
     private Member member;
 
@@ -54,7 +55,7 @@ public class Approve extends BaseEntity {
      * @author moong
      * */
     @MapsId("teamId")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", updatable = false, insertable = false, foreignKey = @ForeignKey(name = "fk_approve_team_id"))
     @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Team team;
