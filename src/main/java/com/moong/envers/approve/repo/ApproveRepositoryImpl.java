@@ -31,6 +31,8 @@ public class ApproveRepositoryImpl implements ApproveRepositoryCustom {
      * from approve a
      *  left outer join member b on a.member_id = b.id
      *  left outer join team c on a.team_id = c.id
+     *
+     * @author moong
      */
     @Override
     public List<Approve> findByMember(Member approveMember) {
