@@ -51,6 +51,16 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     }
 
     @Test
+    @DisplayName("신청서의 대한 승인자 조회")
+    void testRetrieveApproveAboutApplyForm() {
+        testWriteApplyForm();
+        doEntityManagerFlushAndClear();
+        log.info(">>>>>");
+
+
+    }
+
+    @Test
     @DisplayName("신청서 저장")
     void testWriteApplyForm() {
         Optional<Member> member1 = memberRepository.findByName("newcomer1");
