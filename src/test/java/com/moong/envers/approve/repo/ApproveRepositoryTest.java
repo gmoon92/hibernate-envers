@@ -127,8 +127,8 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
          * */
 //      [3] findOne 테스트
         Example<Approve> example = Example.of(Approve.register(member, team).changeApproveStatus(ApproveStatus.ASSENT));
-        Optional<Approve> findOneApprove = approveRepository.findOne(example);
-        findOneApprove.ifPresent(approve -> {
+        Optional<Approve> maybeApprove = approveRepository.findOne(example);
+        maybeApprove.ifPresent(approve -> {
             log.info("findOneApprove : {}", approve);
             Assertions.assertThat(approve)
                     .isEqualTo(Approve.register(member,team).changeApproveStatus(ApproveStatus.ASSENT));

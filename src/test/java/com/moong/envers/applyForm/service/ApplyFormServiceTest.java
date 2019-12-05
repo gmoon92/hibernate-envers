@@ -63,14 +63,14 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     @Test
     @DisplayName("신청서 저장")
     void testWriteApplyForm() {
-        Optional<Member> member1 = memberRepository.findByName("newcomer1");
-        Optional<Member> member2 = memberRepository.findByName("newcomer2");
-        writeForApplyFormByAllTeam(member1);
-        writeForApplyFormByAllTeam(member2);
+        Optional<Member> maybeMember1 = memberRepository.findByName("newcomer1");
+        Optional<Member> maybeMember2 = memberRepository.findByName("newcomer2");
+        writeForApplyFormByAllTeam(maybeMember1);
+        writeForApplyFormByAllTeam(maybeMember2);
     }
 
-    private void writeForApplyFormByAllTeam(Optional<Member> member) {
-        member.ifPresent(applyMember -> {
+    private void writeForApplyFormByAllTeam(Optional<Member> maybeMember) {
+        maybeMember.ifPresent(applyMember -> {
             List<Team> teams = teamRepository.findAll();
             for (Team applyTeam : teams) {
                 applyFormRepository.save(ApplyForm.write(applyMember, applyTeam,  String.format("%s 부서에 신청합니다.", applyTeam.getName())));
@@ -83,9 +83,9 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     void testChangeApplyFormStatus() {
         testWriteApplyForm();
 
-        Optional<Member> member = memberRepository.findByName("kim");
-        log.info("approve member -> {}", member);
-        member.ifPresent(approveMember -> {
+        Optional<Member> maybeMember = memberRepository.findByName("kim");
+        log.info("approve member -> {}", maybeMember);
+        maybeMember.ifPresent(approveMember -> {
             List<ApplyForm> applyForms = applyFormRepository.findApplyFormsToApprove(approveMember);
             log.info("retrieve is apply form -> {}", applyForms);
         });

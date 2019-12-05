@@ -64,18 +64,19 @@ class RevisionTraceQueryTest extends BaseJPARepositoryTestCase {
         log.info("getEntityAud_세가지_방식 [3] 순수 query 작성 가능 : {}", memberAud3);
     }
 
-    @Test
-    public void getPreModifiedRevision() {
-    }
-
-    @Test
-    public void getModifiedEntities() {
-    }
-
-    @AfterEach
-    public void doEntityManagerFlushAndClear() {
-        log.info("close...");
-        em.flush();
-        em.clear();
-    }
+    //      switch (target) {
+//        case AGENT_GROUP_USER:
+//          AgentGroupUser.Id agentGroupUserId = AgentGroupUser.Id.from(entityId);
+//          query.add(AuditEntity.property("id.agentGroupId").eq(agentGroupUserId.getAgentGroupId()));
+//          query.add(AuditEntity.property("id.userId").eq(agentGroupUserId.getUserId()) );
+//          break;
+//        case AGENT_USER:
+//          AgentUser.Id agentUserId = AgentUser.Id.from(entityId);
+//          query.add(AuditEntity.property("id.agentId").eq(agentUserId.getAgentId()));
+//          query.add(AuditEntity.property("id.userId").eq(agentUserId.getUserId()));
+//          break;
+//        default:
+//          query.add(AuditEntity.id().eq(entityId));
+//          break;
+//      }
 }
