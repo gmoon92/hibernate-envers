@@ -2,11 +2,13 @@ package com.moong.envers.approve.repo;
 
 import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.team.domain.Team;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.moong.envers.approve.domain.QApprove.approve;
 import static com.moong.envers.member.domain.QMember.member;
@@ -35,11 +37,21 @@ public class ApproveRepositoryImpl implements ApproveRepositoryCustom {
      * @author moong
      */
     @Override
-    public List<Approve> findByMember(Member approveMember) {
+    public Set<Approve> findByMember(Member approveMember) {
+        return jpaQueryFactory.select(approve)
+                .from(approve)
+                .innerJoin(approve.member, member).fetchJoin()
+                .leftJoin(approve.team, team).fetchJoin()
+                .fetch().stream().collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Approve> findByTeam(Team approveTeam) {
         return jpaQueryFactory.select(approve)
                 .from(approve)
                 .leftJoin(approve.member, member).fetchJoin()
-                .leftJoin(approve.team, team).fetchJoin()
-                .fetch();
+                .innerJoin(approve.team, team).fetchJoin()
+                .where(approve.team.eq(approveTeam))
+                .fetch().stream().collect(Collectors.toSet());
     }
 }

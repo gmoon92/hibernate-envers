@@ -11,13 +11,17 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
@@ -45,18 +49,32 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
         approveRepository.saveAll(Arrays.asList(
                  Approve.register(kim, web1)
                 ,Approve.register(lee, web1)
+                ,Approve.register(jts, web2)
         ));
         doEntityManagerFlushAndClear();
         log.info("\n\n\n\n");
     }
 
     @Test
-    @DisplayName("신청서의 대한 승인자 조회")
-    void testRetrieveApproveAboutApplyForm() {
+    @DisplayName("신청서에 대한 승인자 조회")
+    void testRetrieveApproverAboutApplyForm() {
         testWriteApplyForm();
         doEntityManagerFlushAndClear();
         log.info(">>>>>");
 
+        Optional<Member> maybeMember = memberRepository.findByName("newcomer1");
+
+        maybeMember.ifPresent(applyMember -> {
+            List<ApplyForm> applyForms = applyFormRepository.findByApplyMember(applyMember);
+
+            log.info("applyForms : {}", applyForms.size());
+            Set<Approve> approves = applyForms.stream()
+                    .map(ApplyForm::getApproves)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+
+            log.info("approves : {}", approves.size());
+        });
 
     }
 
@@ -73,7 +91,16 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
         maybeMember.ifPresent(applyMember -> {
             List<Team> teams = teamRepository.findAll();
             for (Team applyTeam : teams) {
-                applyFormRepository.save(ApplyForm.write(applyMember, applyTeam,  String.format("%s 부서에 신청합니다.", applyTeam.getName())));
+                Set<Approve> approvers = approveRepository.findByTeam(applyTeam);
+                ApplyForm saveApplyForm = ApplyForm.write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName()))
+                        .notifyForApprovers(approvers);
+                ApplyForm applyForm = applyFormRepository.save(saveApplyForm);
+                log.info("applyForm : {}", applyForm);
+                log.info("applyForm.getApproves().size() : {}", applyForm.getApproves().size());
+
+                Assertions.assertThat(approvers)
+                        .isNotEmpty()
+                        .isEqualTo(applyForm.getApproves());
             }
         });
     }
@@ -86,7 +113,7 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
         Optional<Member> maybeMember = memberRepository.findByName("kim");
         log.info("approve member -> {}", maybeMember);
         maybeMember.ifPresent(approveMember -> {
-            List<ApplyForm> applyForms = applyFormRepository.findApplyFormsToApprove(approveMember);
+            List<ApplyForm> applyForms = applyFormRepository.findByApproveMember(approveMember);
             log.info("retrieve is apply form -> {}", applyForms);
         });
     }
