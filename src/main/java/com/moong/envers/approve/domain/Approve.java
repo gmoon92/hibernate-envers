@@ -36,7 +36,7 @@ import java.io.Serializable;
           @AttributeOverride(name = "createdDt", column = @Column(name = "approve_date"))
         , @AttributeOverride(name = "createdBy", column = @Column(name = "approve_member_name"))
 })
-@ToString(exclude = {"member", "team"}) @EqualsAndHashCode(of = "id")
+@ToString(exclude = {"member", "team"}) @EqualsAndHashCode(of = {"member", "team"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Approve extends BaseEntity {
 

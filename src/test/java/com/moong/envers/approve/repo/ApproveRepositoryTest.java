@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -76,7 +77,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         log.info(">>>>>>>>>>>>>>>>>");
         log.info(">>>>>>>>>>>>>>>>>");
 //        N+1 발생
-        List<Approve> approveMembers = approveRepository.findByMember(member);
+        Set<Approve> approveMembers = approveRepository.findByMember(member);
         log.info("approveMembers {} : {}", approveMembers.size(), approveMembers);
         doEntityManagerFlushAndClear();
 
