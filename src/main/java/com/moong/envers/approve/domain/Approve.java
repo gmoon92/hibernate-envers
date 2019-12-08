@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -64,7 +65,8 @@ public class Approve extends BaseEntity {
     @Column(name = "status")
     private ApproveStatus status;
 
-    @ManyToOne
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "apply_form_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_approve_apply_form_id"))
     private ApplyForm applyForm;
 

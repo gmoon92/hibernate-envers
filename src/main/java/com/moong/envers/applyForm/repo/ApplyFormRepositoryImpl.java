@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import java.util.List;
 
 import static com.moong.envers.applyForm.domain.QApplyForm.applyForm;
-import static com.moong.envers.team.domain.QTeam.team;
+import static com.moong.envers.approve.domain.QApprove.approve;
 
 /**
  * Spring Repository Custom 하기
@@ -28,12 +28,11 @@ class ApplyFormRepositoryImpl implements ApplyFormRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    public List<ApplyForm> findApplyFormsToApprove(Member approveMember) {
+    public List<ApplyForm> findByApproveMember(Member approveMember) {
         return jpaQueryFactory.select(applyForm)
                 .from(applyForm)
-                .leftJoin(applyForm.team, team)
-                .where(team.eq(approveMember.getTeam()))
+                .innerJoin(applyForm.approves, approve)
+                .where(approve.member.eq(approveMember))
                 .fetch();
     }
-
 }
