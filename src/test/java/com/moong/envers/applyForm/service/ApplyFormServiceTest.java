@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -58,21 +59,34 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     @Test
     @DisplayName("신청서에 대한 승인자 조회")
     void testRetrieveApproverAboutApplyForm() {
-        testWriteApplyForm();
-        doEntityManagerFlushAndClear();
-        log.info(">>>>>");
-
         Optional<Member> maybeMember = memberRepository.findByName("newcomer1");
+        writeForApplyFormByAllTeam(maybeMember);
+
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         maybeMember.ifPresent(applyMember -> {
-            List<ApplyForm> applyForms = applyFormRepository.findByApplyMember(applyMember);
+            log.info("[1] ApplyForms 조회");
+            List<ApplyForm> applyForms = applyFormRepository.findByMember(applyMember);
 
-            log.info("applyForms : {}", applyForms.size());
+            applyForms.forEach(applyForm -> {
+                Set<Approve> approves = applyForm.getApproves();
+                System.err.println(approves);
+            });
+            /**
+             * 승인자를 구하기 위해
+             * applyForm 엔티티를 기준으로 탐색을 시작한다.
+             * 스트림을 통해 데이터를 가공하는 과정에서 Approve 조회 쿼리가 발생하게 된다.
+             *
+             * 예를 들자면, 신청서에 승인자가 3명이라면
+             * 승인자 데이터를 얻기 위해 3번의 조회 쿼리가 발생하게 된다.
+             * @author : moong
+             * */
             Set<Approve> approves = applyForms.stream()
                     .map(ApplyForm::getApproves)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
-
             log.info("approves : {}", approves.size());
         });
 
@@ -82,27 +96,30 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     @DisplayName("신청서 저장")
     void testWriteApplyForm() {
         Optional<Member> maybeMember1 = memberRepository.findByName("newcomer1");
-        Optional<Member> maybeMember2 = memberRepository.findByName("newcomer2");
         writeForApplyFormByAllTeam(maybeMember1);
-        writeForApplyFormByAllTeam(maybeMember2);
+//        Optional<Member> maybeMember2 = memberRepository.findByName("newcomer2");
+//        writeForApplyFormByAllTeam(maybeMember2);
     }
 
-    private void writeForApplyFormByAllTeam(Optional<Member> maybeMember) {
+    @Transactional
+    public void writeForApplyFormByAllTeam(Optional<Member> maybeMember) {
+        log.info("[Insert] 신청서 시작");
         maybeMember.ifPresent(applyMember -> {
             List<Team> teams = teamRepository.findAll();
             for (Team applyTeam : teams) {
                 Set<Approve> approvers = approveRepository.findByTeam(applyTeam);
                 ApplyForm saveApplyForm = ApplyForm.write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName()))
                         .notifyForApprovers(approvers);
+
+                log.info("saveApplyForm.getApproves() : {}", saveApplyForm.getApproves());
                 ApplyForm applyForm = applyFormRepository.save(saveApplyForm);
-                log.info("applyForm : {}", applyForm);
+                doEntityManagerFlushAndClear();
                 log.info("applyForm.getApproves().size() : {}", applyForm.getApproves().size());
 
-                Assertions.assertThat(approvers)
-                        .isNotEmpty()
-                        .isEqualTo(applyForm.getApproves());
+                Assertions.assertThat(approvers).isNotEmpty().isEqualTo(applyForm.getApproves());
             }
         });
+        log.info("[Insert] ApplyForm END");
     }
 
     @Test
