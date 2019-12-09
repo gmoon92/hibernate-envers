@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
@@ -32,12 +33,14 @@ import java.io.Serializable;
 
 @Audited
 @Entity
-@Getter
+@DynamicUpdate
 @AttributeOverrides( {
           @AttributeOverride(name = "createdDt", column = @Column(name = "approve_date"))
         , @AttributeOverride(name = "createdBy", column = @Column(name = "approve_member_name"))
 })
-@ToString(exclude = {"member", "team"}) @EqualsAndHashCode(of = {"member", "team"})
+@Getter
+@ToString(exclude = {"member", "team", "applyForm"})
+@EqualsAndHashCode(of = {"member", "team"}, exclude = {"id"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Approve extends BaseEntity {
 
@@ -67,7 +70,7 @@ public class Approve extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "apply_form_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_approve_apply_form_id"))
+    @JoinColumn(name = "apply_form_id", insertable = false, foreignKey = @ForeignKey(name = "fk_approve_apply_form_id"))
     private ApplyForm applyForm;
 
     @Builder(access = AccessLevel.PROTECTED)

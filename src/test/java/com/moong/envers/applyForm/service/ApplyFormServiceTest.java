@@ -15,7 +15,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,9 +47,9 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
         memberRepository.saveAll(Arrays.asList(kim, lee, moon, jts, newcomer1, newcomer2));
 
         approveRepository.saveAll(Arrays.asList(
-                 Approve.register(kim, web1)
-                ,Approve.register(lee, web1)
-                ,Approve.register(jts, web2)
+                Approve.register(kim, web1)
+                , Approve.register(lee, web1)
+                , Approve.register(jts, web2)
         ));
         doEntityManagerFlushAndClear();
         log.info("\n\n\n\n");
@@ -81,7 +80,7 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
              *
              * 예를 들자면, 신청서에 승인자가 3명이라면
              * 승인자 데이터를 얻기 위해 3번의 조회 쿼리가 발생하게 된다.
-             * @author : moong
+             * @author moong
              * */
             Set<Approve> approves = applyForms.stream()
                     .map(ApplyForm::getApproves)
@@ -93,33 +92,78 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     }
 
     @Test
+    @DisplayName("신청서 삭제, 단, 승인자는 삭제하지 않는다.")
+    void testDeleteApplyForm() {
+        Optional<Member> maybeMember1 = memberRepository.findByName("newcomer1");
+        writeForApplyFormByAllTeam(maybeMember1);
+
+        /**
+         * parent domain remove width out child remove
+         * 부모 테이블을 삭제할 때 자식 테이블도 삭제를 자동적으로 되길 원한다면 두 가지 방법이있다.
+         *
+         * 1. orphanRemoval = true
+         * 2. CascadeType.REMOVE
+         *
+         * 첫 번째 방법은 orphanRemoval 옵션을 지정하는 방식이다.
+         * 이 방식은 객체의 레퍼런스가 끊어지게 되면 delete 쿼리를 발생하게 된다.
+         *
+         * 반면 CascadeType.REMOVE인 경우, 레퍼런스의 연결이 끊어진다고 해서 자동 삭제되는 방식이 아닌,
+         * 명시적으로 레파지토리 또는 엔티티 매니저를 통해 해당 도메인 객체를 삭제할 때 같이 삭제됨을 의미하는
+         * 영속성 전이와 관련된 옵션이다.
+         *
+         * 다음 코드를 보며 정리하자면, 고아 객체 제거 여부에 따라도 달리 해석할 수 있다.
+         * 1) Cascade.REMOVE
+         * @Entity
+         * class Parent{
+         *  @OneToMany(cascade=Cascade.REMOVE)
+         *  private List<Child> childes;
+         * }
+         * Parent 엔티티가 삭제될 때 연관된 Child 엔티티도 삭제
+         *
+         * 2) orphanRemoval
+         * @Entity
+         * class Parent{
+         *  @OneToMany(orphanRemoval = true)
+         *  private List<Child> childes;
+         * }
+         * Collection childes 에서 Child 객체가 제거되는 경우 DB에서도 삭제
+         *
+         * 참고
+         * https://stackoverflow.com/questions/4329577/jpa-2-0-orphanremoval-true-vs-on-delete-cascade
+         * https://m.blog.naver.com/PostView.nhn?blogId=heops79&logNo=220734819674&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+         *
+         * @author moong
+         */
+        applyFormRepository.deleteAll();
+        doEntityManagerFlushAndClear();
+    }
+
+    @Test
     @DisplayName("신청서 저장")
     void testWriteApplyForm() {
         Optional<Member> maybeMember1 = memberRepository.findByName("newcomer1");
         writeForApplyFormByAllTeam(maybeMember1);
-//        Optional<Member> maybeMember2 = memberRepository.findByName("newcomer2");
-//        writeForApplyFormByAllTeam(maybeMember2);
+
+        Optional<Member> maybeMember2 = memberRepository.findByName("newcomer2");
+        writeForApplyFormByAllTeam(maybeMember2);
     }
 
-    @Transactional
     public void writeForApplyFormByAllTeam(Optional<Member> maybeMember) {
-        log.info("[Insert] 신청서 시작");
+        log.info("[Insert] ApplyForm START");
         maybeMember.ifPresent(applyMember -> {
             List<Team> teams = teamRepository.findAll();
             for (Team applyTeam : teams) {
                 Set<Approve> approvers = approveRepository.findByTeam(applyTeam);
-                ApplyForm saveApplyForm = ApplyForm.write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName()))
-                        .notifyForApprovers(approvers);
+                ApplyForm applyForm = applyFormRepository.save(ApplyForm.write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName())))
+                        .notifyForApprover(approvers);
 
-                log.info("saveApplyForm.getApproves() : {}", saveApplyForm.getApproves());
-                ApplyForm applyForm = applyFormRepository.save(saveApplyForm);
-                doEntityManagerFlushAndClear();
-                log.info("applyForm.getApproves().size() : {}", applyForm.getApproves().size());
-
-                Assertions.assertThat(approvers).isNotEmpty().isEqualTo(applyForm.getApproves());
+                Assertions.assertThat(approvers)
+                        .isNotEmpty()
+                        .isEqualTo(applyForm.getApproves());
             }
         });
         log.info("[Insert] ApplyForm END");
+        doEntityManagerFlushAndClear();
     }
 
     @Test

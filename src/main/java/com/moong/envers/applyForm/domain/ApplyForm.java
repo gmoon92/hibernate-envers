@@ -11,12 +11,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -29,9 +30,12 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PreRemove;
 import javax.persistence.Table;
+import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 @Audited
 @Entity
 @Table(indexes = {
@@ -44,7 +48,7 @@ import java.util.Set;
 })
 @Getter
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ApplyForm extends BaseEntity {
 
@@ -70,13 +74,13 @@ public class ApplyForm extends BaseEntity {
      * <p>
      * Cascade 설정
      * CascadeType.PERSIST 등록만 가능하도록 설정했다.
-     * 다음 애노테이션으로도 설정 가능하다.
-     *
+     * 또한, 다음 하이버네이트 애노테이션으로도 설정 가능하다.
      * @Cascade(value = org.hibernate.annotations.CascadeType.PERSIST)
+     *
      * @author moong
      */
-    @OneToMany(mappedBy = "applyForm", cascade = { CascadeType.PERSIST })
-    private Set<Approve> approves;
+    @OneToMany(mappedBy = "applyForm")
+    private Set<Approve> approves = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private ApproveStatus status;
@@ -85,6 +89,8 @@ public class ApplyForm extends BaseEntity {
 
     @Builder(access = AccessLevel.PROTECTED)
     private ApplyForm(Member member, Team team, Set<Approve> approves, ApproveStatus status, String content) {
+        if (CollectionUtils.isEmpty(approves))
+            approves = new HashSet<>();
         this.member = member;
         this.team = team;
         this.approves = approves;
@@ -92,10 +98,12 @@ public class ApplyForm extends BaseEntity {
         this.content = content;
     }
 
-
+    @PreRemove
+    private void remove() {
+        this.getApproves().forEach(approve -> approve.setApplyForm(null));
+    }
 
     /**
-     *
      * List, Set, Map 초기화를 할 수 없다.
      *
      * @Singular 의 목적은 값을 넣기 전에 초기화가 아니라
@@ -117,9 +125,44 @@ public class ApplyForm extends BaseEntity {
         return this;
     }
 
-    public ApplyForm notifyForApprovers(Set<Approve> approves) {
-        this.approves = approves;
+    public ApplyForm notifyForApprover(Set<Approve> approves) {
+        approves.forEach(this::addNotifyForApprover);
         return this;
     }
 
+    /**
+     * cascade에 대한 오해
+     *
+     * cascade는 fk를 관리하지 않는 도메인 객체에서 영속상태를 전파하기 위한 옵션이다.
+     * 내가 오해를 했던 부분은 다음과 같다.
+     *
+     * 신청서 도메인을 insert 할 때
+     * 기존에 등록되어 있던 승인자 도메인에 설정된 fk(신청서 id)를 update 하고 싶었다.
+     *
+     * 1] 팀을 기준으로 승인자들을 조회한다.
+     * Set<Approve> approves = approveRepository.findByTeam(team);
+     *
+     * 2] 조회된 승인자들을 신청서 도메인 객체에 저장한다.
+     * approves.forEach(none::addNotifyForApprover);
+     *
+     * 3] 신청서를 저장한다.
+     * applyFormRepository.save(saveApplyForm);
+     *
+     * 예상된 결과는 applyForm 을 저장하는 순간,
+     * 조회한 Approve 의 ApplyForm fk 를 cascade 설정에 의해 update 쿼리가 발생할줄 알았다.
+     *
+     * 하지만 ApplyForm은 persist 하는 순간 fk 설정과 관련된 update 쿼리가 발생하지 않았다.
+     * 임의로 다음과 같이 관계를 설정했고, 이는 Cascade 옵션과는 무관하다.
+     * 트랜잭션이 끝이나면 dirty checking 이 되도록 설정하였다.
+     * @author moong
+     * */
+    public ApplyForm addNotifyForApprover(Approve approve) {
+        if (approve.getApplyForm() != null) {
+            approve.getApplyForm().getApproves()
+                    .remove(approve);
+        }
+        approve.setApplyForm(this);
+        this.approves.add(approve);
+        return this;
+    }
 }
