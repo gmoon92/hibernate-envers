@@ -1,5 +1,6 @@
 package com.moong.envers.approve.repo;
 
+import com.moong.envers.applyForm.domain.ApplyForm;
 import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
@@ -7,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,4 +56,21 @@ public class ApproveRepositoryImpl implements ApproveRepositoryCustom {
                 .where(approve.team.eq(approveTeam))
                 .fetch().stream().collect(Collectors.toSet());
     }
+
+    @Override
+    public void changeApplyFormByApprove(Collection<Approve> approves, ApplyForm applyForm) {
+        jpaQueryFactory.update(approve)
+                .set(approve.applyForm, applyForm)
+                .where(approve.in(approves))
+                .execute();
+    }
+
+    @Override
+    public void changeApplyFormByApprove(Approve approves, ApplyForm applyForm) {
+        jpaQueryFactory.update(approve)
+                .set(approve.applyForm, applyForm)
+                .where(approve.eq(approves))
+                .execute();
+    }
+
 }

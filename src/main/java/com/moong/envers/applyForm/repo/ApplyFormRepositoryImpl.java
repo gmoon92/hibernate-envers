@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -34,5 +35,22 @@ class ApplyFormRepositoryImpl implements ApplyFormRepositoryCustom {
                 .innerJoin(applyForm.approves, approve)
                 .where(approve.member.eq(approveMember))
                 .fetch();
+    }
+
+    @Override
+    @Transactional
+    public void remove(ApplyForm reqApplyForm) {
+        changeNotifiedApplyFormToOtherApplyForm(reqApplyForm, null);
+        jpaQueryFactory.delete(applyForm)
+                .where(applyForm.eq(reqApplyForm))
+                .execute();
+    }
+
+    @Override
+    public void changeNotifiedApplyFormToOtherApplyForm(ApplyForm where, ApplyForm set) {
+        jpaQueryFactory.update(approve)
+                .set(approve.applyForm, set)
+                .where(approve.applyForm.eq(where))
+                .execute();
     }
 }
