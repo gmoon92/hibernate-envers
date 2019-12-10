@@ -24,7 +24,8 @@ import java.io.Serializable;
 @Entity
 @Table(name = "rev_history_modified")
 @Getter
-@ToString @EqualsAndHashCode(of = {"revision", "entityId", "revisionTarget"})
+@ToString(of = { "id", "entityId", "revisionTarget", "revisionType", "revisionEventStatus" })
+@EqualsAndHashCode(of = { "revision", "entityId", "revisionTarget" })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RevisionHistoryModified {
 
