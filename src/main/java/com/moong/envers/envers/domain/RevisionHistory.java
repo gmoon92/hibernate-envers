@@ -33,7 +33,8 @@ import java.util.Set;
 @Table(name = "rev_history")
 @RevisionEntity(RevisionHistoryListener.class)
 @Getter
-@ToString(exclude = { "modifiedEntities" }) @EqualsAndHashCode(of = { "id" }, exclude = { "modifiedEntities" })
+@ToString(of = { "id", "createdDt", "updatedBy", "updatedByUsername" })
+@EqualsAndHashCode(of = { "id" }, exclude = { "modifiedEntities" })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RevisionHistory implements Serializable {
 
