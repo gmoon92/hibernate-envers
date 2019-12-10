@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 import org.springframework.util.CollectionUtils;
@@ -115,7 +116,7 @@ public class ApplyForm extends BaseEntity {
         return ApplyForm.builder()
                 .member(applyMember)
                 .team(applyTeam)
-                .content(content)
+                .content(StringUtils.defaultString(content, String.format("%s 부서에 신청합니다.", applyTeam.getName())))
                 .status(ApproveStatus.WAIT)
                 .build();
     }

@@ -56,14 +56,10 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     }
 
     @Test
-    @DisplayName("신청서에 대한 승인자 조회")
+    @DisplayName("신청자에 대한 승인자 조회")
     void testRetrieveApproverAboutApplyForm() {
         Optional<Member> maybeMember = memberRepository.findByName("newcomer1");
         writeForApplyFormByAllTeam(maybeMember);
-
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
         maybeMember.ifPresent(applyMember -> {
             log.info("[1] ApplyForms 조회");
@@ -71,7 +67,7 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
 
             applyForms.forEach(applyForm -> {
                 Set<Approve> approves = applyForm.getApproves();
-                System.err.println(approves);
+                log.info("approves : {}", approves.size());
             });
             /**
              * 승인자를 구하기 위해
@@ -88,7 +84,6 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
                     .collect(Collectors.toSet());
             log.info("approves : {}", approves.size());
         });
-
     }
 
     @Test
@@ -96,6 +91,14 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
     void testDeleteApplyForm() {
         Optional<Member> maybeMember1 = memberRepository.findByName("newcomer1");
         writeForApplyFormByAllTeam(maybeMember1);
+
+        ApplyForm applyForm = applyFormRepository.findByMember(maybeMember1.get())
+                .stream().findFirst().get();
+
+        log.info("Collection 부가적인 쿼리가 발생하지 않도록 queryDsl 커스텀 삭제 쿼리 생성");
+        approveRepository.changeApplyFormByApprove(applyForm.getApproves(), null);
+        applyFormRepository.delete(applyForm);
+        doEntityManagerFlushAndClear();
 
         /**
          * parent domain remove width out child remove
@@ -134,7 +137,8 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
          *
          * @author moong
          */
-        applyFormRepository.deleteAll();
+        log.info("성능문제로 Approve.ApplyForm Update query 1번만 요청하도록 변경");
+        applyFormRepository.remove(applyForm);
         doEntityManagerFlushAndClear();
     }
 
