@@ -1,4 +1,4 @@
-package com.moong.envers.envers.revison;
+package com.moong.envers.envers.repo;
 
 import com.moong.envers.common.domain.BaseEntity;
 import com.moong.envers.envers.config.exception.RevisionException;

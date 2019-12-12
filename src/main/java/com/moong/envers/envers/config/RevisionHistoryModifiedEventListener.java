@@ -1,7 +1,7 @@
 package com.moong.envers.envers.config;
 
 import com.moong.envers.envers.domain.RevisionHistoryModified;
-import com.moong.envers.envers.revison.RevisionTraceQuery;
+import com.moong.envers.envers.repo.RevisionTraceQuery;
 import com.moong.envers.envers.types.RevisionEventStatus;
 import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
