@@ -1,4 +1,4 @@
-package com.moong.envers.envers.revison.service;
+package com.moong.envers.envers.service;
 
 import com.moong.envers.common.config.BaseServiceTestCase;
 import lombok.AccessLevel;
