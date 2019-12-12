@@ -12,7 +12,6 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
 

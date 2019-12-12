@@ -25,7 +25,8 @@ import static com.moong.envers.envers.types.RevisionEventStatus.SUITABLE;
 public class RevisionHistoryModifiedEventListener implements PostInsertEventListener {
 
     private final EntityManager em;
-    private final RevisionTraceQuery traceQuery;
+
+    private RevisionTraceQuery traceQuery;
 
     public RevisionHistoryModifiedEventListener(EntityManager em) {
         this.em = em;

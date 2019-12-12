@@ -7,7 +7,6 @@ import org.hibernate.event.service.spi.EventListenerRegistry;
 import org.hibernate.event.spi.EventType;
 import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 
@@ -19,7 +18,6 @@ import javax.persistence.EntityManager;
  *  참고 : https://vladmihalcea.com/hibernate-event-listeners/
  * @author moong
  */
-@Component
 public class JPAEventListenerIntegrator implements Integrator {
 
     @Override
