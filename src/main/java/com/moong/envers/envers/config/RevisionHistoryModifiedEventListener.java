@@ -1,12 +1,14 @@
 package com.moong.envers.envers.config;
 
 import com.moong.envers.envers.domain.RevisionHistoryModified;
-import com.moong.envers.envers.repo.RevisionTraceQuery;
+import com.moong.envers.envers.repo.AuditedEntityRepository;
+import com.moong.envers.envers.repo.AuditedEntityRepositoryImpl;
+import com.moong.envers.envers.repo.RevisionHistoryModifiedRepositoryCustom;
+import com.moong.envers.envers.repo.RevisionHistoryModifiedRepositoryRepositoryImpl;
 import com.moong.envers.envers.types.RevisionEventStatus;
 import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
-import com.querydsl.jpa.impl.JPAUpdateClause;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.event.spi.PostInsertEvent;
 import org.hibernate.event.spi.PostInsertEventListener;
@@ -16,21 +18,23 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Optional;
 
-import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
+import static com.moong.envers.envers.types.RevisionEventStatus.DISPLAY;
 import static com.moong.envers.envers.types.RevisionEventStatus.ERROR;
-import static com.moong.envers.envers.types.RevisionEventStatus.NOT_SUITABLE;
-import static com.moong.envers.envers.types.RevisionEventStatus.SUITABLE;
+import static com.moong.envers.envers.types.RevisionEventStatus.NOT_DISPLAY;
 
 @Slf4j
 public class RevisionHistoryModifiedEventListener implements PostInsertEventListener {
 
     private final EntityManager em;
 
-    private RevisionTraceQuery traceQuery;
+    private AuditedEntityRepository auditedEntityRepository;
+
+    private RevisionHistoryModifiedRepositoryCustom revisionHistoryModifiedRepository;
 
     public RevisionHistoryModifiedEventListener(EntityManager em) {
         this.em = em;
-        this.traceQuery = new RevisionTraceQuery(em);
+        this.auditedEntityRepository = new AuditedEntityRepositoryImpl(em);
+        this.revisionHistoryModifiedRepository = new RevisionHistoryModifiedRepositoryRepositoryImpl(em);
     }
 
     @Override
@@ -39,88 +43,89 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         if (entity instanceof RevisionHistoryModified) {
             log.info("PostInsertEventListener start...");
 
-//            EntityManager em = event.getSession().getEntityManagerFactory().createEntityManager();
-            RevisionHistoryModified revModified = RevisionHistoryModified.class.cast(entity);
+            RevisionHistoryModified modified = RevisionHistoryModified.class.cast(entity);
 
-            Long revNumber = revModified.getRevision().getId();
-            Long revModifiedId = revModified.getId();
-
-            RevisionTarget revTarget = revModified.getRevisionTarget();
-            Class entityClass = revTarget.getEntityClass();
-            String entityId = revModified.getEntityId();
-
-            RevisionEventStatus eventStatus = SUITABLE;
-            String targetUserId = null;
-            String targetAgentId = null;
-
+            Optional<Object> auditedEntity = getAuditedEntity(modified);
+            Optional<RevisionEventStatus> eventStatus = Optional.empty();
             try {
-                Object currentEntity = traceQuery.getEntityAud(revNumber, entityId, entityClass);
-
-                Optional<RevisionHistoryModified> beforeRevisionModified = traceQuery.getPreModifiedRevision(revModified);
-
-                if (beforeRevisionModified.isPresent()) {
-                    RevisionHistoryModified before = beforeRevisionModified.get();
-                    Long beforeRevisionNumber = before.getRevision().getId();
-                    String beforeEntityId = before.getEntityId();
-
-                    Object beforeEntity = traceQuery.getEntityAud(beforeRevisionNumber, beforeEntityId, entityClass);
-
-                    if (isCompareToEntity(currentEntity, beforeEntity, revTarget)) {
-                        eventStatus = NOT_SUITABLE;
-                    }
-                }
-                targetUserId = String.valueOf(getTargetUserId(em, currentEntity, entityId, revTarget));
-                targetAgentId = String.valueOf(getTargetTeamId(em, currentEntity, entityId, revTarget));
+                Optional<Object> maybePreAuditedEntity = getPreAuditedEntity(modified);
+                eventStatus = getRevisionEventStatus(modified.getRevisionTarget(), auditedEntity, maybePreAuditedEntity);
             } catch (Exception ex) {
-                eventStatus = ERROR;
-                log.error("[ERR] onPostInsert occur", ex);
+                log.warn("Unexpected exception... ", ex);
+                eventStatus = Optional.of(ERROR);;
             } finally {
-                updateRevisionModifiedEntity(em, revModifiedId, eventStatus, targetAgentId, targetUserId);
+                updateRevisionModifiedEntity(modified, auditedEntity.get(), eventStatus.orElse(NOT_DISPLAY));
             }
         }
     }
 
-    private Object getTargetUserId(EntityManager em, Object entity, String entityId, RevisionTarget target) {
-        switch (target) {
-            case MEMBER:
-                return Member.class.cast(entity).getId();
-            default:
-                return null;
+    private Optional<Object> getAuditedEntity(RevisionHistoryModified modified) {
+        RevisionTarget target = modified.getRevisionTarget();
+
+        Long revisionNumber = modified.getRevision().getId();
+        Class entityClass = target.getEntityClass();
+        Object entityId = target.convertToEntityID(modified.getEntityId());
+        return auditedEntityRepository.findAuditedEntity(revisionNumber, entityClass, entityId);
+    }
+
+    private Optional<Object> getPreAuditedEntity(RevisionHistoryModified modified) {
+        Optional<RevisionHistoryModified> maybePreModified = revisionHistoryModifiedRepository.findPreRevisionHistoryModified(modified);
+        return maybePreModified.flatMap(this::getAuditedEntity);
+    }
+
+    private Optional<RevisionEventStatus> getRevisionEventStatus(RevisionTarget target, Object auditedEntity, Optional<Object> maybePreAuditedEntity) {
+        if (maybePreAuditedEntity.isPresent()
+                && compareToEntityVO(target, auditedEntity, maybePreAuditedEntity.get())) {
+            return Optional.of(NOT_DISPLAY);
+        } else {
+            return Optional.of(DISPLAY);
         }
     }
 
-    private Object getTargetTeamId(EntityManager em, Object entity, String entityId, RevisionTarget target) {
-        switch (target) {
-            case TEAM:
-                return Team.class.cast(entity).getId();
-            default:
-                return null;
-        }
+    private boolean compareToEntityVO(RevisionTarget target, Object auditedEntity, Object preAuditedEntity) {
+//        Object currentVO = target.convertVO(auditedEntity);
+//        Object preVO = target.convertVO(preAuditedEntity);
+//        return currentVO.equals(preVO);
+        return true;
     }
 
-    private void updateRevisionModifiedEntity(EntityManager em, Long revisionModifiedEntityId, RevisionEventStatus eventStatus, String targetAgentId, String targetUserId) {
-        log.debug("Update HistoryRevisionModifiedEntity... id : {}, eventStatus : {}", revisionModifiedEntityId, eventStatus);
+    private void updateRevisionModifiedEntity(RevisionHistoryModified modified, Object auditedEntity, RevisionEventStatus eventStatus) {
         EntityTransaction entityTransaction = em.getTransaction();
+
+        Long id = modified.getId();
+        RevisionTarget target = modified.getRevisionTarget();
+        String entityId = modified.getEntityId();
+
+        Team targetTeam = getTargetTeam(target, auditedEntity, entityId);
+        Member targetMember = getTargetMember(target, auditedEntity, entityId);
+
         try {
             entityTransaction.begin();
-            new JPAUpdateClause(em, revisionHistoryModified)
-                    .set(revisionHistoryModified.revisionEventStatus, eventStatus)
-//                    .set(revisionHistoryModified.targetAgentId, targetAgentId)
-//                    .set(revisionHistoryModified.targetUserId, targetUserId)
-                    .where(revisionHistoryModified.id.eq(revisionModifiedEntityId))
-                    .execute();
+            revisionHistoryModifiedRepository.updateRevisionModifiedByTargetDataAndEventStatus(id, targetTeam, targetMember, eventStatus);
             entityTransaction.commit();
-        } catch (Exception e) {
-            log.warn("[Error] HistoryRevisionEventListener.updateRevisionModifiedEntity Update HistoryRevisionModifiedEntity id : {}, eventStatus : {}", revisionModifiedEntityId, eventStatus, e.fillInStackTrace());
+        } catch (Exception ex) {
+            String errorMessage = String.format("[Error] Update RevisionModifiedEntity id : %s, target : %s, entityId : %s", id, eventStatus);
+            log.warn(errorMessage, ex);
             entityTransaction.rollback();
         }
     }
 
-    private boolean isCompareToEntity(Object currentEntity, Object beforeEntity, RevisionTarget target) {
-//        Object currentVO = target.convertVO(currentEntity);
-//        Object beforeVO = target.convertVO(beforeEntity);
-//        return currentVO.equals(beforeVO);
-        return true;
+    private Member getTargetMember(RevisionTarget target, Object entity, String entityId) {
+        switch (target) {
+            case MEMBER:
+                return Member.class.cast(entity);
+            default:
+                return null;
+        }
+    }
+
+    private Team getTargetTeam(RevisionTarget target, Object entity, String entityId) {
+        switch (target) {
+            case TEAM:
+                return Team.class.cast(entity);
+            default:
+                return null;
+        }
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.moong.envers.envers.service;
 
-import com.moong.envers.envers.repo.RevisionTraceQuery;
+import com.moong.envers.envers.repo.RevisionHistoryModifiedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,6 +10,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RevisionService {
 
-    private final RevisionTraceQuery traceQuery;
+    private final RevisionHistoryModifiedRepository revisionHistoryModifiedRepository;
 
 }
