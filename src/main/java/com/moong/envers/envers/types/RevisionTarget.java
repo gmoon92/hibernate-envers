@@ -1,5 +1,6 @@
 package com.moong.envers.envers.types;
 
+import com.moong.envers.common.domain.BaseEntity;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
 import lombok.Getter;
@@ -14,11 +15,11 @@ public enum RevisionTarget {
      MEMBER(Member.class, String::valueOf, Long::valueOf)
     ,TEAM(Team.class, String::valueOf, Long::valueOf);
 
-    private final Class<?> entityClass;
+    private final Class<? extends BaseEntity> entityClass;
     private final Function<Serializable, String> convertToRevisionEntityIDExpression;
     private final Function<String, Object> convertToEntityIDExpression;
 
-    RevisionTarget(Class<?> entityClass, Function<Serializable, String> convertToRevisionEntityIDExpression, Function<String, Object> convertToEntityIDExpression) {
+    RevisionTarget(Class<? extends BaseEntity> entityClass, Function<Serializable, String> convertToRevisionEntityIDExpression, Function<String, Object> convertToEntityIDExpression) {
         this.entityClass = entityClass;
         this.convertToRevisionEntityIDExpression = convertToRevisionEntityIDExpression;
         this.convertToEntityIDExpression = convertToEntityIDExpression;
