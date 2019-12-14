@@ -1,13 +1,13 @@
-package com.moong.envers.envers.config;
+package com.moong.envers.revision.config;
 
-import com.moong.envers.envers.domain.RevisionHistoryModified;
-import com.moong.envers.envers.repo.AuditedEntityRepository;
-import com.moong.envers.envers.repo.AuditedEntityRepositoryImpl;
-import com.moong.envers.envers.repo.RevisionHistoryModifiedRepositoryCustom;
-import com.moong.envers.envers.repo.RevisionHistoryModifiedRepositoryRepositoryImpl;
-import com.moong.envers.envers.types.RevisionEventStatus;
-import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.domain.RevisionHistoryModified;
+import com.moong.envers.revision.repo.AuditedEntityRepository;
+import com.moong.envers.revision.repo.AuditedEntityRepositoryImpl;
+import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryCustom;
+import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryRepositoryImpl;
+import com.moong.envers.revision.types.RevisionEventStatus;
+import com.moong.envers.revision.types.RevisionTarget;
 import com.moong.envers.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.event.spi.PostInsertEvent;
@@ -18,9 +18,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import java.util.Optional;
 
-import static com.moong.envers.envers.types.RevisionEventStatus.DISPLAY;
-import static com.moong.envers.envers.types.RevisionEventStatus.ERROR;
-import static com.moong.envers.envers.types.RevisionEventStatus.NOT_DISPLAY;
+import static com.moong.envers.revision.types.RevisionEventStatus.DISPLAY;
+import static com.moong.envers.revision.types.RevisionEventStatus.ERROR;
+import static com.moong.envers.revision.types.RevisionEventStatus.NOT_DISPLAY;
 
 @Slf4j
 public class RevisionHistoryModifiedEventListener implements PostInsertEventListener {
@@ -65,12 +65,16 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         Long revisionNumber = modified.getRevision().getId();
         Class entityClass = target.getEntityClass();
         Object entityId = target.convertToEntityID(modified.getEntityId());
-        return auditedEntityRepository.findAuditedEntity(revisionNumber, entityClass, entityId);
+        return auditedEntityRepository.findAuditedEntity(entityClass, entityId, revisionNumber);
     }
 
     private Optional<Object> getPreAuditedEntity(RevisionHistoryModified modified) {
-        Optional<RevisionHistoryModified> maybePreModified = revisionHistoryModifiedRepository.findPreRevisionHistoryModified(modified);
-        return maybePreModified.flatMap(this::getAuditedEntity);
+        RevisionTarget target = modified.getRevisionTarget();
+
+        Long revisionNumber = modified.getRevision().getId();
+        Class entityClass = target.getEntityClass();
+        Object entityId = target.convertToEntityID(modified.getEntityId());
+        return auditedEntityRepository.findPreAuditedByIgnoreDeleteType(revisionNumber, entityClass, entityId);
     }
 
     private Optional<RevisionEventStatus> getRevisionEventStatus(RevisionTarget target, Object auditedEntity, Optional<Object> maybePreAuditedEntity) {

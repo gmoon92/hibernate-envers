@@ -1,7 +1,7 @@
-package com.moong.envers.envers.domain;
+package com.moong.envers.revision.domain;
 
-import com.moong.envers.envers.types.RevisionEventStatus;
-import com.moong.envers.envers.types.RevisionTarget;
+import com.moong.envers.revision.types.RevisionEventStatus;
+import com.moong.envers.revision.types.RevisionTarget;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

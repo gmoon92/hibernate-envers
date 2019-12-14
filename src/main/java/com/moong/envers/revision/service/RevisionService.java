@@ -1,6 +1,6 @@
-package com.moong.envers.envers.service;
+package com.moong.envers.revision.service;
 
-import com.moong.envers.envers.repo.RevisionHistoryModifiedRepository;
+import com.moong.envers.revision.repo.RevisionHistoryModifiedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

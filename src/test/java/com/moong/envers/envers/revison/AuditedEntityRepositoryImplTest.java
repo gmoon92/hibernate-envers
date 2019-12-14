@@ -2,20 +2,14 @@ package com.moong.envers.envers.revison;
 
 import com.moong.envers.common.config.BaseJPARepositoryTestCase;
 import com.moong.envers.common.config.SampleDataSettings;
-import com.moong.envers.envers.config.RevisionHistoryModifiedEventListener;
-import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.types.RevisionTarget;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.event.service.spi.EventListenerGroup;
-import org.hibernate.event.service.spi.EventListenerRegistry;
-import org.hibernate.event.spi.EventType;
-import org.hibernate.event.spi.PostInsertEventListener;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,9 +17,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManagerFactory;
-import java.util.Optional;
 
 import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
 import static com.moong.envers.member.domain.QMember.member;
@@ -70,6 +62,7 @@ class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
         AuditReader auditReader = AuditReaderFactory.get(em);
 
 //        [1] RevisionType.DEL 제외 조회
+//        rev = max(rev.id) 최신 rev
         Member memberAud1 = auditReader.find(Member.class, entityId, rev);
         log.info("getEntityAud_세가지_방식 [1] RevisionType.DEL 제외 조회 : {}", memberAud1);
 

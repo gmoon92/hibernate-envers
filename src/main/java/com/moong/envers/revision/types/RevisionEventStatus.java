@@ -1,4 +1,4 @@
-package com.moong.envers.envers.types;
+package com.moong.envers.revision.types;
 
 import lombok.Getter;
 

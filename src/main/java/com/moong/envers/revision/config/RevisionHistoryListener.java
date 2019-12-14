@@ -1,8 +1,8 @@
-package com.moong.envers.envers.config;
+package com.moong.envers.revision.config;
 
-import com.moong.envers.envers.domain.RevisionHistory;
-import com.moong.envers.envers.types.RevisionEventStatus;
-import com.moong.envers.envers.types.RevisionTarget;
+import com.moong.envers.revision.domain.RevisionHistory;
+import com.moong.envers.revision.types.RevisionEventStatus;
+import com.moong.envers.revision.types.RevisionTarget;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.envers.EntityTrackingRevisionListener;
 import org.hibernate.envers.RevisionType;
