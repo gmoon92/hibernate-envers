@@ -1,4 +1,4 @@
-package com.moong.envers.envers.types;
+package com.moong.envers.revision.types;
 
 import com.moong.envers.common.domain.BaseEntity;
 import com.moong.envers.member.domain.Member;

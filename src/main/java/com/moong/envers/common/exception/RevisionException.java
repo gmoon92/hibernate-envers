@@ -1,5 +1,6 @@
-package com.moong.envers.envers.config.exception;
+package com.moong.envers.common.exception;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
@@ -7,10 +8,10 @@ import lombok.NoArgsConstructor;
  *
  * @author moong
  */
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RevisionException extends RuntimeException {
 
-    private static final String DEFAULT_ERROR_MESSAGE = "REV history error... error message : %s";
+    private static final String DEFAULT_ERROR_MESSAGE = "Revision exception occurs : %s";
 
     public RevisionException(String message) {
         super(String.format(DEFAULT_ERROR_MESSAGE, message));

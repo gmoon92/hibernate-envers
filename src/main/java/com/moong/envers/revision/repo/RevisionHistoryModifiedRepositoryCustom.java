@@ -1,9 +1,9 @@
-package com.moong.envers.envers.repo;
+package com.moong.envers.revision.repo;
 
-import com.moong.envers.envers.domain.RevisionHistoryModified;
-import com.moong.envers.envers.types.RevisionEventStatus;
-import com.moong.envers.envers.types.RevisionTarget;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.domain.RevisionHistoryModified;
+import com.moong.envers.revision.types.RevisionEventStatus;
+import com.moong.envers.revision.types.RevisionTarget;
 import com.moong.envers.team.domain.Team;
 
 import java.util.List;

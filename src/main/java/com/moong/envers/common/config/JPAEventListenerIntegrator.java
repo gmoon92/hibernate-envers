@@ -1,6 +1,6 @@
 package com.moong.envers.common.config;
 
-import com.moong.envers.envers.config.RevisionHistoryModifiedEventListener;
+import com.moong.envers.revision.config.RevisionHistoryModifiedEventListener;
 import org.hibernate.boot.Metadata;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.event.service.spi.EventListenerRegistry;
