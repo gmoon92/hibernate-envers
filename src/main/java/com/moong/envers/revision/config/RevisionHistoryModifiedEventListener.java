@@ -46,7 +46,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
 
             RevisionHistoryModified modified = RevisionHistoryModified.class.cast(entity);
 
-            Optional<Object> auditedEntity = getAuditedEntity(modified);
+            Object auditedEntity = getAuditedEntity(modified).get();
             Optional<RevisionEventStatus> eventStatus = Optional.empty();
             try {
                 Optional<Object> maybePreAuditedEntity = getPreAuditedEntity(modified);
@@ -55,7 +55,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
                 log.warn("Unexpected exception... ", ex);
                 eventStatus = Optional.of(ERROR);;
             } finally {
-                updateRevisionModifiedEntity(modified, auditedEntity.get(), eventStatus.orElse(NOT_DISPLAY));
+                updateRevisionModifiedEntity(modified, auditedEntity, eventStatus.orElse(NOT_DISPLAY));
             }
         }
     }
@@ -70,6 +70,8 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
     }
 
     private Optional<Object> getPreAuditedEntity(RevisionHistoryModified modified) {
+//        return revisionHistoryModifiedRepository.findPreRevisionHistoryModified(modified)
+//            .flatMap(this::getAuditedEntity);
         RevisionTarget target = modified.getRevisionTarget();
 
         Long revisionNumber = modified.getRevision().getId();
@@ -106,7 +108,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
 
         try {
             entityTransaction.begin();
-            revisionHistoryModifiedRepository.updateRevisionModifiedByTargetDataAndEventStatus(id, targetTeam, targetMember, eventStatus);
+            revisionHistoryModifiedRepository.updateTargetDataAndEventStatus(id, targetTeam, targetMember, eventStatus);
             entityTransaction.commit();
         } catch (Exception ex) {
             String errorMessage = String.format("[Error] Update RevisionModifiedEntity id : %s, target : %s, entityId : %s", id, eventStatus);

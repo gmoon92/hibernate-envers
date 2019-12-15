@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface RevisionHistoryModifiedRepositoryCustom {
 
-    void updateRevisionModifiedByTargetDataAndEventStatus(Long revisionModifiedEntityId, Team targetTeam, Member targetMember, RevisionEventStatus eventStatus);
+    void updateTargetDataAndEventStatus(Long revisionModifiedEntityId, Team targetTeam, Member targetMember, RevisionEventStatus eventStatus);
 
     Optional<RevisionHistoryModified> findPreRevisionHistoryModified(RevisionHistoryModified modified);
 
