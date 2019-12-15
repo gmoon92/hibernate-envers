@@ -77,7 +77,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
 
     @Override
     @Transactional(readOnly = true)
-    public <T extends BaseEntity> Optional<T> findPreAuditedByIgnoreDeleteType(Long revisionNumber, Class<T> entityClass, Object entityId) {
+    public <T extends BaseEntity> Optional<T> findPreAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber) {
         T auditedEntity = null;
         try {
             auditedEntity = getAuditReader().find(entityClass, entityId, revisionNumber - 1);
