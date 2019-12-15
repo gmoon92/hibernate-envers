@@ -25,7 +25,7 @@ public class RevisionHistoryModifiedRepositoryRepositoryImpl implements Revision
 
     @Override
     @Transactional
-    public void updateRevisionModifiedByTargetDataAndEventStatus(Long modifiedId, Team targetTeam, Member targetMember, RevisionEventStatus eventStatus) {
+    public void updateTargetDataAndEventStatus(Long modifiedId, Team targetTeam, Member targetMember, RevisionEventStatus eventStatus) {
         new JPAUpdateClause(em, revisionHistoryModified)
                 .set(revisionHistoryModified.revisionEventStatus, eventStatus)
                 .where(revisionHistoryModified.id.eq(modifiedId))
