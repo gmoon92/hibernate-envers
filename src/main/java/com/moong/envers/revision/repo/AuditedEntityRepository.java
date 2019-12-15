@@ -11,5 +11,5 @@ public interface AuditedEntityRepository {
 
     <T extends BaseEntity> Optional<T> findAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber, RevisionType revisionType);
 
-    <T extends BaseEntity> Optional<T> findPreAuditedByIgnoreDeleteType(Long revisionNumber, Class<T> entityClass, Object entityId);
+    <T extends BaseEntity> Optional<T> findPreAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber);
 }

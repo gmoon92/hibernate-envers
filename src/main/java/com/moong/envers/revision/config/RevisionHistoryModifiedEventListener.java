@@ -75,7 +75,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         Long revisionNumber = modified.getRevision().getId();
         Class entityClass = target.getEntityClass();
         Object entityId = target.convertToEntityID(modified.getEntityId());
-        return auditedEntityRepository.findPreAuditedByIgnoreDeleteType(revisionNumber, entityClass, entityId);
+        return auditedEntityRepository.findPreAuditedEntity(entityClass, entityId, revisionNumber);
     }
 
     private Optional<RevisionEventStatus> getRevisionEventStatus(RevisionTarget target, Object auditedEntity, Optional<Object> maybePreAuditedEntity) {
