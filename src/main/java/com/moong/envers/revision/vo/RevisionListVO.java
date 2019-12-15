@@ -1,32 +1,33 @@
 package com.moong.envers.revision.vo;
 
+import com.moong.envers.common.vo.BaseSearchVO;
 import com.moong.envers.revision.types.RevisionTarget;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
-@Getter
 public class RevisionListVO {
 
-    private SearchVO search;
+    @Getter @Setter
+    private SearchVO searchVO;
 
     @Getter
-    public static class SearchVO {
+    public static class SearchVO extends BaseSearchVO {
 
-        private LocalDateTime startDt;
-
-        private LocalDateTime endDt;
+        public enum SearchType {
+            EMPTY, MEMBER_NAME, TARGET_TEAM_NAME, TARGET_MEMBER_NAME
+        }
 
         private RevisionTarget revisionTarget;
 
         private SearchType searchType;
 
-        private String searchText;
-
-        public enum SearchType {
-            EMPTY, USER_NAME, TARGET_TEAM_NAME, TARGET_MEMBER_NAME
+        public SearchVO() {
+            super(Sort.by(Sort.Direction.DESC, "createdDt"));
         }
     }
 
@@ -36,7 +37,7 @@ public class RevisionListVO {
 
         private Long rev;
 
-        private String revDate;
+        private Date revDate;
 
         private String memberId;
 
@@ -44,20 +45,20 @@ public class RevisionListVO {
 
         private RevisionTarget revisionTarget;
 
-        private String targetId;
+        private String entityId;
 
         private String targetTeamName;
 
         private String targetMemberName;
 
         @QueryProjection
-        public DataVO(Long rev, String revDate, String memberId, String memberName, RevisionTarget revisionTarget, String targetId, String targetTeamName, String targetMemberName) {
+        public DataVO(Long rev, Date revDate, String memberId, String memberName, RevisionTarget revisionTarget, String entityId, String targetTeamName, String targetMemberName) {
             this.rev = rev;
             this.revDate = revDate;
             this.memberId = memberId;
             this.memberName = memberName;
             this.revisionTarget = revisionTarget;
-            this.targetId = targetId;
+            this.entityId = entityId;
             this.targetTeamName = targetTeamName;
             this.targetMemberName = targetMemberName;
         }
