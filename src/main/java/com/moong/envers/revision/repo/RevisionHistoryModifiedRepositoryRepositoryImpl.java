@@ -4,12 +4,18 @@ import com.moong.envers.member.domain.Member;
 import com.moong.envers.revision.domain.RevisionHistoryModified;
 import com.moong.envers.revision.types.RevisionEventStatus;
 import com.moong.envers.revision.types.RevisionTarget;
+import com.moong.envers.revision.vo.QRevisionListVO_DataVO;
+import com.moong.envers.revision.vo.RevisionListVO;
 import com.moong.envers.team.domain.Team;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
-import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.envers.RevisionType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import javax.persistence.EntityManager;
 import java.util.List;
@@ -18,13 +24,16 @@ import java.util.Optional;
 import static com.moong.envers.revision.domain.QRevisionHistory.revisionHistory;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
-@RequiredArgsConstructor
-public class RevisionHistoryModifiedRepositoryRepositoryImpl implements RevisionHistoryModifiedRepositoryCustom {
+public class RevisionHistoryModifiedRepositoryRepositoryImpl extends QuerydslRepositorySupport implements RevisionHistoryModifiedRepositoryCustom {
 
     private final EntityManager em;
 
+    public RevisionHistoryModifiedRepositoryRepositoryImpl(EntityManager em) {
+        super(RevisionHistoryModified.class);
+        this.em = em;
+    }
+
     @Override
-    @Transactional
     public void updateTargetDataAndEventStatus(Long modifiedId, Team targetTeam, Member targetMember, RevisionEventStatus eventStatus) {
         new JPAUpdateClause(em, revisionHistoryModified)
                 .set(revisionHistoryModified.revisionEventStatus, eventStatus)
@@ -55,5 +64,48 @@ public class RevisionHistoryModifiedRepositoryRepositoryImpl implements Revision
                 .where(revisionHistoryModified.revision.id.eq(revisionNumber)
                         .and(revisionHistoryModified.revisionTarget.eq(target)))
                 .fetch();
+    }
+
+    @Override
+    public Page<RevisionListVO.DataVO> findAllBySearchVO(RevisionListVO.SearchVO searchVO) {
+        JPAQuery<RevisionListVO.DataVO> query = new JPAQuery(em);
+
+        Pageable pageable = searchVO.getPageable();
+        query.select(new QRevisionListVO_DataVO(revisionHistory.id, revisionHistory.createdDt
+                , revisionHistory.updatedBy, revisionHistory.updatedByUsername
+                , revisionHistoryModified.revisionTarget, revisionHistoryModified.entityId
+                , revisionHistoryModified.targetTeamName, revisionHistoryModified.targetMemberName))
+                .from(revisionHistory)
+                .innerJoin(revisionHistory.modifiedEntities, revisionHistoryModified)
+                .where(revisionHistoryModified.revisionEventStatus.eq(RevisionEventStatus.DISPLAY))
+                .where(revisionHistoryModified.revisionType.eq(RevisionType.MOD));
+
+        setSearchCondition(query, searchVO);
+
+        List<RevisionListVO.DataVO> list = getQuerydsl().applyPagination(pageable, query).fetch();
+        return new PageImpl(list, pageable, query.fetchCount());
+    }
+
+    private void setSearchCondition(JPAQuery query, RevisionListVO.SearchVO search) {
+        query.where(revisionHistory.createdDt.between(search.getStartDt(), search.getEndDt()));
+
+        RevisionListVO.SearchVO.SearchType keywordCondition = Optional.ofNullable(search.getSearchType())
+                .orElse(RevisionListVO.SearchVO.SearchType.EMPTY);
+
+        String searchKeyword = search.getSearchKeyword();
+
+        if (StringUtils.isNotBlank(searchKeyword)) {
+            switch (keywordCondition) {
+                case MEMBER_NAME:
+                    query.where(revisionHistory.updatedByUsername.contains(searchKeyword));
+                    break;
+                case TARGET_MEMBER_NAME:
+                    query.where(revisionHistoryModified.targetMemberName.contains(searchKeyword));
+                    break;
+                case TARGET_TEAM_NAME:
+                    query.where(revisionHistoryModified.targetTeamName.contains(searchKeyword));
+                    break;
+            }
+        }
     }
 }
