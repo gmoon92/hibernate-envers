@@ -15,8 +15,8 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
-import static com.moong.envers.envers.domain.QRevisionHistory.revisionHistory;
-import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
+import static com.moong.envers.revision.domain.QRevisionHistory.revisionHistory;
+import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
 @RequiredArgsConstructor
 public class RevisionHistoryModifiedRepositoryRepositoryImpl implements RevisionHistoryModifiedRepositoryCustom {

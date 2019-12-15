@@ -1,6 +1,6 @@
 package com.moong.envers.revision.domain;
 
-import com.moong.envers.revision.config.RevisionHistoryListener;
+import com.moong.envers.revision.core.listener.RevisionHistoryListener;
 import com.moong.envers.revision.types.RevisionEventStatus;
 import com.moong.envers.revision.types.RevisionTarget;
 import lombok.AccessLevel;

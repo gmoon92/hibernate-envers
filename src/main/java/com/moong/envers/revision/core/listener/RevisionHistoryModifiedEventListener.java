@@ -1,8 +1,8 @@
-package com.moong.envers.revision.config;
+package com.moong.envers.revision.core.listener;
 
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.core.exception.RevisionHistoryException;
 import com.moong.envers.revision.domain.RevisionHistoryModified;
-import com.moong.envers.revision.exception.RevisionException;
 import com.moong.envers.revision.repo.AuditedEntityRepository;
 import com.moong.envers.revision.repo.AuditedEntityRepositoryImpl;
 import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryCustom;
@@ -51,7 +51,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
             try {
                 Optional<Object> maybePreAuditedEntity = getPreAuditedEntity(modified);
                 eventStatus = getRevisionEventStatus(modified.getRevisionTarget(), auditedEntity, maybePreAuditedEntity);
-            } catch (RevisionException ex) {
+            } catch (RevisionHistoryException ex) {
                 log.warn("Unexpected exception... ", ex);
                 eventStatus = Optional.of(ERROR);;
             } finally {
