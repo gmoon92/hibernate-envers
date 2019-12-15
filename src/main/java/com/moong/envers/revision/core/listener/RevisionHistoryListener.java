@@ -1,4 +1,4 @@
-package com.moong.envers.revision.config;
+package com.moong.envers.revision.core.listener;
 
 import com.moong.envers.revision.domain.RevisionHistory;
 import com.moong.envers.revision.types.RevisionEventStatus;

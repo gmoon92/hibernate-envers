@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManagerFactory;
 
-import static com.moong.envers.envers.domain.QRevisionHistoryModified.revisionHistoryModified;
 import static com.moong.envers.member.domain.QMember.member;
+import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
 @Import( { SampleDataSettings.class})
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,15 +31,15 @@ class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
     private Long entityId;
     private Long rev;
 
-    @PostConstruct
-    public void registerListeners() {
-        this.sessionFactory = Optional.ofNullable(factory.unwrap(SessionFactory.class))
-                .orElseThrow(() -> new NullPointerException("factory is not a hibernate factory"));
-        EventListenerRegistry registry = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(EventListenerRegistry.class);
-        EventListenerGroup<PostInsertEventListener> eventListenerGroup = registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT);
-        eventListenerGroup.clear();
-        eventListenerGroup.appendListener(new RevisionHistoryModifiedEventListener(em));
-    }
+//    @PostConstruct
+//    public void registerListeners() {
+//        this.sessionFactory = Optional.ofNullable(factory.unwrap(SessionFactory.class))
+//                .orElseThrow(() -> new NullPointerException("factory is not a hibernate factory"));
+//        EventListenerRegistry registry = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(EventListenerRegistry.class);
+//        EventListenerGroup<PostInsertEventListener> eventListenerGroup = registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT);
+//        eventListenerGroup.clear();
+//        eventListenerGroup.appendListener(new RevisionHistoryModifiedEventListener(em));
+//    }
 
     @BeforeEach
     void init() {

@@ -1,7 +1,7 @@
 package com.moong.envers.revision.repo;
 
 import com.moong.envers.common.domain.BaseEntity;
-import com.moong.envers.revision.exception.RevisionException;
+import com.moong.envers.revision.core.exception.RevisionHistoryException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.envers.AuditReader;
@@ -47,7 +47,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
         } catch (Exception ex) {
             String errorMessage = String.format("Unexpected exception... revisionNumber : %s, entityClass : %s, entityId : %s", revisionNumber, entityClass, entityId);
             log.error(errorMessage, ex);
-            throw new RevisionException(errorMessage, ex);
+            throw new RevisionHistoryException(errorMessage, ex);
         } finally {
             return Optional.ofNullable(entityClass.cast(auditedEntity));
         }
@@ -69,7 +69,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
         } catch (Exception ex) {
             String errorMessage = String.format("Unexpected exception... revisionNumber : %s, entityClass : %s, entityId : %s", revisionNumber, entityClass, entityId);
             log.error(errorMessage, ex);
-            throw new RevisionException(errorMessage, ex);
+            throw new RevisionHistoryException(errorMessage, ex);
         } finally {
             return Optional.ofNullable(entityClass.cast(auditedEntity));
         }
@@ -87,7 +87,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
         } catch (Exception ex) {
             String errorMessage = String.format("Unexpected exception... revisionNumber : %s, entityClass : %s, entityId : %s", revisionNumber, entityClass, entityId);
             log.error(errorMessage, ex);
-            throw new RevisionException(errorMessage, ex);
+            throw new RevisionHistoryException(errorMessage, ex);
         } finally {
             return Optional.ofNullable(auditedEntity);
         }
