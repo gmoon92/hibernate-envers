@@ -17,7 +17,7 @@ public interface RevisionHistoryModifiedRepositoryCustom {
 
     Optional<RevisionHistoryModified> findPreRevisionHistoryModified(RevisionHistoryModified modified);
 
-    List<RevisionHistoryModified> findAllByRevisionNumberAndTarget(Long revisionNumber, RevisionTarget target);
+    List<RevisionHistoryModified> findAllByRevisionAndRevisionTarget(Long revisionNumber, RevisionTarget target);
 
     Page<RevisionListVO.DataVO> findAllBySearchVO(RevisionListVO.SearchVO searchVO);
 }

@@ -5,17 +5,19 @@ import com.moong.envers.revision.types.RevisionTarget;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.util.Date;
 
+@ToString
 public class RevisionListVO {
 
     @Getter @Setter
-    private SearchVO searchVO;
+    private SearchVO searchVO = new SearchVO();
 
-    @Getter
+    @Getter @Setter
     public static class SearchVO extends BaseSearchVO {
 
         public enum SearchType {
@@ -26,8 +28,13 @@ public class RevisionListVO {
 
         private SearchType searchType;
 
+//        todo : order by type safe code...?
         public SearchVO() {
-            super(Sort.by(Sort.Direction.DESC, "createdDt"));
+            super(Sort.by(Sort.Direction.DESC, "revision.createdDt"));
+        }
+
+        public void setPage(Integer page) {
+            this.page = page;
         }
     }
 

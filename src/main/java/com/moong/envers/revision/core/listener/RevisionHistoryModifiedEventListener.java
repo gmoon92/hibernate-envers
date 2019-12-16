@@ -6,7 +6,7 @@ import com.moong.envers.revision.domain.RevisionHistoryModified;
 import com.moong.envers.revision.repo.AuditedEntityRepository;
 import com.moong.envers.revision.repo.AuditedEntityRepositoryImpl;
 import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryCustom;
-import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryRepositoryImpl;
+import com.moong.envers.revision.repo.RevisionHistoryModifiedRepositoryImpl;
 import com.moong.envers.revision.types.RevisionEventStatus;
 import com.moong.envers.revision.types.RevisionTarget;
 import com.moong.envers.team.domain.Team;
@@ -35,7 +35,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
     public RevisionHistoryModifiedEventListener(EntityManager em) {
         this.em = em;
         this.auditedEntityRepository = new AuditedEntityRepositoryImpl(em);
-        this.revisionHistoryModifiedRepository = new RevisionHistoryModifiedRepositoryRepositoryImpl(em);
+        this.revisionHistoryModifiedRepository = new RevisionHistoryModifiedRepositoryImpl(em);
     }
 
     @Override
