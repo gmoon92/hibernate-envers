@@ -15,7 +15,7 @@ public abstract class BasePageable {
 
     private Integer block = 5;
 
-    private Integer page;
+    protected Integer page = 1;
 
     private Sort sort;
 
@@ -26,12 +26,12 @@ public abstract class BasePageable {
 
     public Pageable getPageable() {
         return PageRequest.of(this.page - 1 // view에서 페이지 번호로 직접 넘겨줌, jpa 시작은 0 부터
-                , block // page block limit
-                , sort
+                , this.block // page block limit
+                , this.sort
         );
     }
 
     private Sort getDefaultSort() {
-        return Sort.by(Sort.DEFAULT_DIRECTION);
+        return Sort.by(Sort.Direction.DESC, "id");
     }
 }

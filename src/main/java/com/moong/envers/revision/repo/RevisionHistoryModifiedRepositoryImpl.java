@@ -18,17 +18,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import javax.persistence.EntityManager;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static com.moong.envers.revision.domain.QRevisionHistory.revisionHistory;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
-public class RevisionHistoryModifiedRepositoryRepositoryImpl extends QuerydslRepositorySupport implements RevisionHistoryModifiedRepositoryCustom {
+public class RevisionHistoryModifiedRepositoryImpl extends QuerydslRepositorySupport implements RevisionHistoryModifiedRepositoryCustom {
 
     private final EntityManager em;
 
-    public RevisionHistoryModifiedRepositoryRepositoryImpl(EntityManager em) {
+    public RevisionHistoryModifiedRepositoryImpl(EntityManager em) {
         super(RevisionHistoryModified.class);
         this.em = em;
     }
@@ -57,7 +58,7 @@ public class RevisionHistoryModifiedRepositoryRepositoryImpl extends QuerydslRep
     }
 
     @Override
-    public List<RevisionHistoryModified> findAllByRevisionNumberAndTarget(Long revisionNumber, RevisionTarget target) {
+    public List<RevisionHistoryModified> findAllByRevisionAndRevisionTarget(Long revisionNumber, RevisionTarget target) {
         JPAQuery<RevisionHistoryModified> query = new JPAQuery(em);
         return query.select(revisionHistoryModified)
                 .from(revisionHistoryModified)
@@ -83,11 +84,15 @@ public class RevisionHistoryModifiedRepositoryRepositoryImpl extends QuerydslRep
         setSearchCondition(query, searchVO);
 
         List<RevisionListVO.DataVO> list = getQuerydsl().applyPagination(pageable, query).fetch();
+
         return new PageImpl(list, pageable, query.fetchCount());
     }
 
     private void setSearchCondition(JPAQuery query, RevisionListVO.SearchVO search) {
-        query.where(revisionHistory.createdDt.between(search.getStartDt(), search.getEndDt()));
+        Date startDt = Optional.ofNullable(search.getStartDt()).orElse(new Date());
+        Date endDt = Optional.ofNullable(search.getEndDt()).orElse(new Date());
+
+        query.where(revisionHistory.createdDt.between(startDt, endDt));
 
         RevisionListVO.SearchVO.SearchType keywordCondition = Optional.ofNullable(search.getSearchType())
                 .orElse(RevisionListVO.SearchVO.SearchType.EMPTY);
