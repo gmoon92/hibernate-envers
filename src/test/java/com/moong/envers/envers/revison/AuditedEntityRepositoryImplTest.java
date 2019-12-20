@@ -1,7 +1,7 @@
 package com.moong.envers.envers.revison;
 
+import com.moong.envers.common.config.BaseDataSettings;
 import com.moong.envers.common.config.BaseJPARepositoryTestCase;
-import com.moong.envers.common.config.SampleDataSettings;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.revision.types.RevisionTarget;
 import lombok.AccessLevel;
@@ -22,7 +22,7 @@ import javax.persistence.EntityManagerFactory;
 import static com.moong.envers.member.domain.QMember.member;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
-@Import( { SampleDataSettings.class})
+@Import( { BaseDataSettings.class})
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
 
