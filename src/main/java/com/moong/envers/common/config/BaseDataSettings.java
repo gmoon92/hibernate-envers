@@ -11,8 +11,11 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.moong.envers.common.constants.Profiles.Constants.DEV;
+import static com.moong.envers.common.constants.Profiles.Constants.LOCAL;
+
 @Slf4j
-@Profile("local")
+@Profile(value = { DEV, LOCAL })
 @Component
 @RequiredArgsConstructor
 public class BaseDataSettings implements CommandLineRunner {

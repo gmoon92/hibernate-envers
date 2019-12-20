@@ -1,15 +1,17 @@
 package com.moong.envers.revision.service;
 
 import com.moong.envers.common.config.BaseServiceTestCase;
-import com.moong.envers.revision.config.RevisionTestDataConfig;
 import com.moong.envers.revision.vo.RevisionListVO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
-@Import(value = { RevisionTestDataConfig.class })
+import static com.moong.envers.common.constants.Profiles.Constants.TEST_REV;
+
+
+@ActiveProfiles(profiles = TEST_REV)
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class RevisionServiceTest extends BaseServiceTestCase {
 
