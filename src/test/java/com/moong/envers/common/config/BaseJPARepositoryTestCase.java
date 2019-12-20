@@ -11,11 +11,12 @@ import org.springframework.test.context.TestConstructor;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import static com.moong.envers.common.constants.Profiles.Constants.TEST;
 import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
 
 @DataJpaTest
 @Import(QueryDslConfig.class)
-@ActiveProfiles("test")
+@ActiveProfiles(profiles = TEST)
 @TestConstructor(autowireMode = ALL)
 public abstract class BaseJPARepositoryTestCase extends BaseTestCase {
 

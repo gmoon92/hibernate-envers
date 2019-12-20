@@ -11,8 +11,10 @@ import org.springframework.context.annotation.Profile;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 
+import static com.moong.envers.common.constants.Profiles.Constants.LOCAL;
+
 @Slf4j
-@Profile("local")
+@Profile(value = LOCAL)
 @Configuration
 public class H2ServerConfig {
 

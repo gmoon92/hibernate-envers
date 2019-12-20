@@ -19,13 +19,16 @@ import javax.sql.DataSource;
 import java.util.Optional;
 import java.util.Properties;
 
+import static com.moong.envers.common.constants.Profiles.Constants.DEV;
+import static com.moong.envers.common.constants.Profiles.Constants.LOCAL;
+
 /**
  * JPA Hibernate Config
  *
  * @author moong
  */
 @Slf4j
-@Profile("local")
+@Profile(value = { DEV, LOCAL })
 @Configuration
 @EnableJpaAuditing
 @EnableTransactionManagement
