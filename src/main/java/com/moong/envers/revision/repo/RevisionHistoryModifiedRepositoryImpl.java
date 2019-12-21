@@ -1,5 +1,6 @@
 package com.moong.envers.revision.repo;
 
+import com.moong.envers.common.utils.DateUtils;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.revision.domain.RevisionHistoryModified;
 import com.moong.envers.revision.types.RevisionEventStatus;
@@ -10,6 +11,7 @@ import com.moong.envers.team.domain.Team;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAUpdateClause;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.envers.RevisionType;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ import java.util.Optional;
 import static com.moong.envers.revision.domain.QRevisionHistory.revisionHistory;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 
+@Slf4j
 public class RevisionHistoryModifiedRepositoryImpl extends QuerydslRepositorySupport implements RevisionHistoryModifiedRepositoryCustom {
 
     private final EntityManager em;
@@ -84,13 +87,15 @@ public class RevisionHistoryModifiedRepositoryImpl extends QuerydslRepositorySup
         setSearchCondition(query, searchVO);
 
         List<RevisionListVO.DataVO> list = getQuerydsl().applyPagination(pageable, query).fetch();
-
         return new PageImpl(list, pageable, query.fetchCount());
     }
 
-    private void setSearchCondition(JPAQuery query, RevisionListVO.SearchVO search) {
-        Date startDt = Optional.ofNullable(search.getStartDt()).orElse(new Date());
-        Date endDt = Optional.ofNullable(search.getEndDt()).orElse(new Date());
+    private JPAQuery setSearchCondition(JPAQuery query, RevisionListVO.SearchVO search) {
+        Date endDt = Optional.ofNullable(search.getEndDt())
+                .orElse(DateUtils.max());
+
+        Date startDt = Optional.ofNullable(search.getStartDt())
+                .orElse(DateUtils.min());
 
         query.where(revisionHistory.createdDt.between(startDt, endDt));
 
@@ -112,5 +117,7 @@ public class RevisionHistoryModifiedRepositoryImpl extends QuerydslRepositorySup
                     break;
             }
         }
+
+        return query;
     }
 }
