@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 
-import static com.moong.envers.common.constants.Profiles.Constants.TEST;
 import static com.moong.envers.common.constants.Profiles.Constants.TEST_REV;
 import static java.util.Arrays.asList;
 
@@ -48,10 +47,10 @@ import static java.util.Arrays.asList;
  * @author gmoon
  * */
 @Slf4j
-@Profile(value = { TEST, TEST_REV })
+@Profile(value = TEST_REV)
 @Configuration
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class RevisionTestDataConfig {
+public class RevisionTestConfig {
 
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;

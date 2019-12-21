@@ -5,7 +5,7 @@ import com.moong.envers.revision.vo.RevisionListVO;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
 import static com.moong.envers.common.constants.Profiles.Constants.TEST_REV;
@@ -21,10 +21,12 @@ class RevisionServiceTest extends BaseServiceTestCase {
     void testGetListVO() {
         RevisionListVO listVO = new RevisionListVO();
         listVO.getSearchVO().setPage(1);
-        Pageable pageable = listVO.getSearchVO().getPageable();
-        revisionService.getListVO(listVO);
 
-        log.info("pageable : {}", pageable);
-        log.info("listVO  : {}", listVO);
+        Page<RevisionListVO.DataVO> page = revisionService.getListVO(listVO);
+
+        log.info("page : {}", page);
+        log.info("page.getContent : {}", page.getContent());
+        log.info("page.getTotalPages : {}", page.getTotalPages());
     }
+
 }
