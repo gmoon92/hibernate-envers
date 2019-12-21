@@ -90,10 +90,9 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
     }
 
     private boolean compareToEntityVO(RevisionTarget target, Object auditedEntity, Object preAuditedEntity) {
-//        Object currentVO = target.convertVO(auditedEntity);
-//        Object preVO = target.convertVO(preAuditedEntity);
-//        return currentVO.equals(preVO);
-        return true;
+        Object currentVO = target.newInstanceCompareVO(auditedEntity);
+        Object preVO = target.newInstanceCompareVO(preAuditedEntity);
+        return currentVO.equals(preVO);
     }
 
     private void updateRevisionModifiedEntity(RevisionHistoryModified modified, Object auditedEntity, RevisionEventStatus eventStatus) {
