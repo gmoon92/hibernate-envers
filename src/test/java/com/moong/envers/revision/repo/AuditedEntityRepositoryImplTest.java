@@ -1,4 +1,4 @@
-package com.moong.envers.envers.revison;
+package com.moong.envers.revision.repo;
 
 import com.moong.envers.common.config.BaseDataSettings;
 import com.moong.envers.common.config.BaseJPARepositoryTestCase;
