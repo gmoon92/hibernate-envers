@@ -1,16 +1,22 @@
 package com.moong.envers.applyForm.vo;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.moong.envers.common.vo.EntityCompareVO;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 
-@Getter
-@Setter
 @ToString
-public class ApplyFormVO {
+@Setter
+@Getter
+@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+public class ApplyFormVO implements EntityCompareVO {
 
     /**
      * Parameter null check
@@ -34,4 +40,5 @@ public class ApplyFormVO {
     private String applyTeamName;
 
     private String content;
+
 }

@@ -30,6 +30,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Audited
 @Entity
@@ -91,6 +93,12 @@ public class Approve extends BaseEntity {
                 .team(team)
                 .status(ApproveStatus.WAIT)
                 .build();
+    }
+
+    public static List<Approve> register(List<Member> members, Team team)  {
+        return members.stream()
+                .map(member1 -> register(member1, team))
+                .collect(Collectors.toList());
     }
 
     public Approve changeApproveStatus(ApproveStatus status) {
