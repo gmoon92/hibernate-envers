@@ -34,7 +34,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Audited
@@ -120,6 +122,17 @@ public class ApplyForm extends BaseEntity {
                 .status(ApproveStatus.WAIT)
                 .build();
     }
+
+    public static ApplyForm write(Member applyMember, Team applyTeam) {
+        return write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName()));
+    }
+
+    public static List<ApplyForm> write(List<Member> applyMembers, Team applyTeam) {
+        return applyMembers.stream()
+                .map(applyMember -> write(applyMember, applyTeam))
+                .collect(Collectors.toList());
+    }
+
 
     public ApplyForm changeApproveStatus(ApproveStatus status) {
         this.status = status;

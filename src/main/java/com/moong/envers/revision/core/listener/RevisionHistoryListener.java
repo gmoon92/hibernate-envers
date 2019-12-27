@@ -21,8 +21,15 @@ public class RevisionHistoryListener implements EntityTrackingRevisionListener {
     @Override
     public void entityChanged(Class entityClass, String entityName, Serializable entityId, RevisionType revisionType, Object revisionEntity) {
         log.info("EntityTrackingRevisionListener entityChanged start...");
-        RevisionHistory revisionHistory = RevisionHistory.class.cast(revisionEntity);
-        revisionHistory.addModifiedEntity(entityId,revisionType, RevisionTarget.of(entityClass), RevisionEventStatus.WAIT);
+
+        try {
+            RevisionHistory revisionHistory = RevisionHistory.class.cast(revisionEntity);
+            revisionHistory.addModifiedEntity(entityId, revisionType, RevisionTarget.of(entityClass), RevisionEventStatus.WAIT);
+        } catch (Exception e) {
+            log.error("Not Created Revision Data...", e);
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override

@@ -158,7 +158,7 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
             List<Team> teams = teamRepository.findAll();
             for (Team applyTeam : teams) {
                 Set<Approve> approvers = approveRepository.findByTeam(applyTeam);
-                ApplyForm applyForm = applyFormRepository.save(ApplyForm.write(applyMember, applyTeam, String.format("%s 부서에 신청합니다.", applyTeam.getName())))
+                ApplyForm applyForm = applyFormRepository.save(ApplyForm.write(applyMember, applyTeam))
                         .notifyForApprover(approvers);
 
                 Assertions.assertThat(approvers)

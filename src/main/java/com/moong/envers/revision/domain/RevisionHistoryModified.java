@@ -21,6 +21,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.io.Serializable;
@@ -42,6 +43,7 @@ public class RevisionHistoryModified {
     private RevisionHistory revision;
 
     @Column(name = "entity_id", updatable = false, nullable = false)
+    @Lob
     private String entityId;
 
     @Enumerated(EnumType.STRING)
@@ -78,6 +80,8 @@ public class RevisionHistoryModified {
         this.revisionType = revisionType;
         this.revisionEventStatus = revisionEventStatus;
     }
+
+
 
 }
 
