@@ -59,14 +59,14 @@ public final class RevisionConverter {
     }
 
     public static <T extends BaseEntity, R extends EntityCompareVO> R ofCompareVO(T entity, Class<R> compareVOClass) {
-        Object compareVO;
+        Assert.notNull(entity, "Error with entity parameter null");
+
         try {
-            compareVO = compareVOClass.newInstance();
+            Object compareVO = compareVOClass.newInstance();
+            BeanUtils.copyProperties(entity, compareVO);
+            return (R) compareVO;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Does Not convert to EntityCompareVO object", e);
         }
-
-        BeanUtils.copyProperties(entity, compareVO);
-        return (R) compareVO;
     }
 }

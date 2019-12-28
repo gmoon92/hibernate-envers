@@ -75,5 +75,7 @@ class RevisionConverterTest {
 
         MemberCompareVO vo = RevisionConverter.ofCompareVO(member, MemberCompareVO.class);
         assertThat(vo).isEqualToComparingFieldByField(member);
+
+        assertThrows(IllegalArgumentException.class, () -> RevisionConverter.ofCompareVO(null, MemberCompareVO.class));
     }
 }
