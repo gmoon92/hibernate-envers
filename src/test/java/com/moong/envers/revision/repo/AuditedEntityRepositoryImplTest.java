@@ -1,12 +1,13 @@
 package com.moong.envers.revision.repo;
 
 import com.moong.envers.common.config.BaseDataSettings;
-import com.moong.envers.common.config.BaseJPARepositoryTestCase;
+import com.moong.envers.common.config.BaseServiceTestCase;
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.types.RevisionTarget;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.SessionFactory;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.hibernate.envers.query.AuditEntity;
@@ -14,32 +15,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
 
+import static com.moong.envers.common.constants.Profiles.Constants.TEST;
+import static com.moong.envers.common.constants.Profiles.Constants.TEST_REV;
 import static com.moong.envers.member.domain.QMember.member;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
+import static org.assertj.core.api.Assertions.assertThat;
 
+@ActiveProfiles(value = { TEST, TEST_REV })
 @Import( { BaseDataSettings.class})
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
+class AuditedEntityRepositoryImplTest extends BaseServiceTestCase {
 
-    private SessionFactory sessionFactory;
-    private final EntityManagerFactory factory;
+    private final EntityManager em;
+    private final JPAQueryFactory jpaQueryFactory;
     private Long entityId;
     private Long rev;
-
-//    @PostConstruct
-//    public void registerListeners() {
-//        this.sessionFactory = Optional.ofNullable(factory.unwrap(SessionFactory.class))
-//                .orElseThrow(() -> new NullPointerException("factory is not a hibernate factory"));
-//        EventListenerRegistry registry = ((SessionFactoryImpl) sessionFactory).getServiceRegistry().getService(EventListenerRegistry.class);
-//        EventListenerGroup<PostInsertEventListener> eventListenerGroup = registry.getEventListenerGroup(EventType.POST_COMMIT_INSERT);
-//        eventListenerGroup.clear();
-//        eventListenerGroup.appendListener(new RevisionHistoryModifiedEventListener(em));
-//    }
 
     @BeforeEach
     void init() {
@@ -48,7 +44,7 @@ class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
                 .fetchOne();
         rev = jpaQueryFactory.select(revisionHistoryModified.revision.id.max())
                 .from(revisionHistoryModified)
-                .where(revisionHistoryModified.entityId.eq(String.valueOf(entityId))
+                .where(revisionHistoryModified.entityId.eq(RevisionConverter.serializedObject(entityId))
                         .and(revisionHistoryModified.revisionTarget.eq(RevisionTarget.MEMBER)))
                 .fetchOne();
 
@@ -79,23 +75,12 @@ class AuditedEntityRepositoryImplTest extends BaseJPARepositoryTestCase {
         Member memberAud3 = (Member) auditReader.createQuery()
                 .forEntitiesModifiedAtRevision(Member.class, rev)
                 .add(AuditEntity.id().eq(entityId))
+//              .add(AuditEntity.property("id.memberId").eq(approve.getId().getMemberId()) );
                 .getSingleResult();
         log.info("getEntityAud_세가지_방식 [3] 순수 query 작성 가능 : {}", memberAud3);
-    }
 
-    //      switch (target) {
-//        case AGENT_GROUP_USER:
-//          AgentGroupUser.Id agentGroupUserId = AgentGroupUser.Id.from(entityId);
-//          query.add(AuditEntity.property("id.agentGroupId").eq(agentGroupUserId.getAgentGroupId()));
-//          query.add(AuditEntity.property("id.userId").eq(agentGroupUserId.getUserId()) );
-//          break;
-//        case AGENT_USER:
-//          AgentUser.Id agentUserId = AgentUser.Id.from(entityId);
-//          query.add(AuditEntity.property("id.agentId").eq(agentUserId.getAgentId()));
-//          query.add(AuditEntity.property("id.userId").eq(agentUserId.getUserId()));
-//          break;
-//        default:
-//          query.add(AuditEntity.id().eq(entityId));
-//          break;
-//      }
+        assertThat(memberAud1)
+                .isEqualTo(memberAud2)
+                .isEqualTo(memberAud3);
+    }
 }
