@@ -2,7 +2,7 @@ package com.moong.envers.common.constants;
 
 /**
  * annotation not attribute value array or enum
- * @author gmoon
+ * @author moong
  * https://stackoverflow.com/questions/2065937/how-to-supply-value-to-an-annotation-from-a-constant-java?rq=1
  * https://jekalmin.tistory.com/entry/spring-security-enum%EC%9C%BC%EB%A1%9C-Secured-%EA%B6%8C%ED%95%9C-%EA%B4%80%EB%A6%AC%ED%95%98%EA%B8%B0
  */

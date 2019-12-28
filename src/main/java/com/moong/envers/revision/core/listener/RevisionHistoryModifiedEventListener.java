@@ -71,14 +71,13 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
     }
 
     private Optional<Object> getPreAuditedEntity(RevisionHistoryModified modified) {
-//        return revisionHistoryModifiedRepository.findPreRevisionHistoryModified(modified)
-//            .flatMap(this::getAuditedEntity);
         RevisionTarget target = modified.getRevisionTarget();
 
         Long revisionNumber = modified.getRevision().getId();
         Class entityClass = target.getEntityClass();
         Object entityId = RevisionConverter.deSerializedObject(modified.getEntityId());
         return auditedEntityRepository.findPreAuditedEntity(entityClass, entityId, revisionNumber);
+//        return revisionHistoryModifiedRepository.findPreRevisionHistoryModified(modified).flatMap(this::getAuditedEntity);
     }
 
     private Optional<RevisionEventStatus> getRevisionEventStatus(RevisionTarget target, Object auditedEntity, Optional<Object> maybePreAuditedEntity) {
@@ -90,10 +89,10 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         }
     }
 
-    private boolean compareToEntityVO(RevisionTarget target, Object auditedEntity, Object preAuditedEntity) {
-        Object currentVO  = target.ofCompareVO(auditedEntity);
-        Object previousVO = target.ofCompareVO(preAuditedEntity);
-        return currentVO.equals(previousVO);
+    private boolean compareToEntityVO(RevisionTarget target, Object auditedEntity, Object anotherEntity) {
+        Object currentVO = target.ofCompareVO(auditedEntity);
+        Object anotherVO = target.ofCompareVO(anotherEntity);
+        return currentVO.equals(anotherVO);
     }
 
     private void updateRevisionModifiedEntity(RevisionHistoryModified modified, Object auditedEntity, RevisionEventStatus eventStatus) {
