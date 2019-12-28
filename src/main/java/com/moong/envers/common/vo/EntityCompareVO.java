@@ -14,7 +14,7 @@ package com.moong.envers.common.vo;
  * @see com.moong.envers.team.vo.TeamCompareVO
  * @see com.moong.envers.applyForm.vo.ApplyFormVO
  * @see com.moong.envers.approve.vo.ApproveVO
- * @author gmoon
+ * @author moong
  */
 public interface EntityCompareVO {
 }

@@ -12,7 +12,6 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
@@ -106,13 +107,13 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
     void testManyToManySave() {
 //      [1] 저장
         Approve saveApprove = approveRepository.save(Approve.register(member, team));
-        Assertions.assertThat(saveApprove.getStatus())
+        assertThat(saveApprove.getStatus())
                 .isEqualTo(ApproveStatus.WAIT);
         doEntityManagerFlushAndClear();
 
 //      [2] Approve 상태 변경 Dirty checking 테스트
         Approve acceptApprove = changeApproveStatus(saveApprove.getId(), ApproveStatus.ASSENT);
-        Assertions.assertThat(acceptApprove.getStatus())
+        assertThat(acceptApprove.getStatus())
                 .isEqualTo(ApproveStatus.ASSENT);
         doEntityManagerFlushAndClear();
 
@@ -129,7 +130,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         Optional<Approve> maybeApprove = approveRepository.findOne(example);
         maybeApprove.ifPresent(approve -> {
             log.info("findOneApprove : {}", approve);
-            Assertions.assertThat(approve)
+            assertThat(approve)
                     .isEqualTo(Approve.register(member,team).changeApproveStatus(ApproveStatus.ASSENT));
         });
     }

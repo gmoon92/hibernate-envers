@@ -26,7 +26,7 @@ public class RevisionHistoryListener implements EntityTrackingRevisionListener {
             RevisionHistory revisionHistory = RevisionHistory.class.cast(revisionEntity);
             revisionHistory.addModifiedEntity(entityId, revisionType, RevisionTarget.of(entityClass), RevisionEventStatus.WAIT);
         } catch (Exception e) {
-            log.error("Not Created Revision Data...", e);
+            log.error("Dose not changed revision object...", e);
             throw new RuntimeException(e);
         }
 

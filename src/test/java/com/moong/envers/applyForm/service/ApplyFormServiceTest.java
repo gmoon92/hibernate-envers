@@ -11,7 +11,6 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
@@ -161,7 +162,7 @@ class ApplyFormServiceTest extends BaseJPARepositoryTestCase {
                 ApplyForm applyForm = applyFormRepository.save(ApplyForm.write(applyMember, applyTeam))
                         .notifyForApprover(approvers);
 
-                Assertions.assertThat(approvers)
+                assertThat(approvers)
                         .isNotEmpty()
                         .isEqualTo(applyForm.getApproves());
             }

@@ -55,7 +55,7 @@ import static java.util.Arrays.asList;
  * https://stackoverflow.com/questions/8363815/integration-testing-with-hibernate-envers
  * https://www.baeldung.com/spring-boot-exclude-auto-configuration-test
  *
- * @author gmoon
+ * @author moong
  */
 @Slf4j
 @Profile(value = TEST_REV)

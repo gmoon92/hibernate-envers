@@ -6,9 +6,10 @@ import com.moong.envers.member.domain.Member;
 import com.moong.envers.member.vo.MemberCompareVO;
 import com.moong.envers.revision.core.utils.RevisionConverter;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 class RevisionTargetTest {
@@ -23,11 +24,11 @@ class RevisionTargetTest {
         MemberCompareVO compareVO2 = (MemberCompareVO) RevisionTarget.MEMBER.ofCompareVO(entity);
 
         log.info("compareVO1 {}", compareVO1);
-        Assertions.assertThat(compareVO1.getName())
+        assertThat(compareVO1.getName())
                 .isEqualTo(compareVO2.getName())
                 .isEqualTo(entity.getName());
 
-        Assertions.assertThat(compareVO1)
+        assertThat(compareVO1)
                 .isEqualTo(compareVO2);
     }
 

@@ -9,9 +9,10 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class ApplyFormRepositoryTest extends BaseJPARepositoryTestCase {
@@ -27,6 +28,6 @@ class ApplyFormRepositoryTest extends BaseJPARepositoryTestCase {
         Member applyMember = memberRepository.save(Member.builder().name("moon").build());
 
         ApplyForm applyForm = applyFormRepository.save(ApplyForm.write(applyMember, applyTeam, "신청 테스트입니다."));
-        Assertions.assertThat(applyForm.getStatus()).isEqualTo(ApproveStatus.WAIT);
+        assertThat(applyForm.getStatus()).isEqualTo(ApproveStatus.WAIT);
     }
 }
