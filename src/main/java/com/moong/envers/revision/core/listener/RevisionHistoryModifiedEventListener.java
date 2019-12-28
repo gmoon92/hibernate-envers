@@ -2,6 +2,7 @@ package com.moong.envers.revision.core.listener;
 
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.revision.core.exception.RevisionHistoryException;
+import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.domain.RevisionHistoryModified;
 import com.moong.envers.revision.repo.AuditedEntityRepository;
 import com.moong.envers.revision.repo.AuditedEntityRepositoryImpl;
@@ -65,7 +66,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
 
         Long revisionNumber = modified.getRevision().getId();
         Class entityClass = target.getEntityClass();
-        Object entityId = target.convertToEntityID(modified.getEntityId());
+        Object entityId = RevisionConverter.deSerializedObject(modified.getEntityId());
         return auditedEntityRepository.findAuditedEntity(entityClass, entityId, revisionNumber);
     }
 
@@ -76,7 +77,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
 
         Long revisionNumber = modified.getRevision().getId();
         Class entityClass = target.getEntityClass();
-        Object entityId = target.convertToEntityID(modified.getEntityId());
+        Object entityId = RevisionConverter.deSerializedObject(modified.getEntityId());
         return auditedEntityRepository.findPreAuditedEntity(entityClass, entityId, revisionNumber);
     }
 
@@ -90,9 +91,9 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
     }
 
     private boolean compareToEntityVO(RevisionTarget target, Object auditedEntity, Object preAuditedEntity) {
-        Object currentVO = target.newInstanceCompareVO(auditedEntity);
-        Object preVO = target.newInstanceCompareVO(preAuditedEntity);
-        return currentVO.equals(preVO);
+        Object currentVO  = target.ofCompareVO(auditedEntity);
+        Object previousVO = target.ofCompareVO(preAuditedEntity);
+        return currentVO.equals(previousVO);
     }
 
     private void updateRevisionModifiedEntity(RevisionHistoryModified modified, Object auditedEntity, RevisionEventStatus eventStatus) {
@@ -100,7 +101,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
 
         Long id = modified.getId();
         RevisionTarget target = modified.getRevisionTarget();
-        String entityId = modified.getEntityId();
+        byte[] entityId = modified.getEntityId();
 
         Team targetTeam = getTargetTeam(target, auditedEntity, entityId);
         Member targetMember = getTargetMember(target, auditedEntity, entityId);
@@ -116,7 +117,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         }
     }
 
-    private Member getTargetMember(RevisionTarget target, Object entity, String entityId) {
+    private Member getTargetMember(RevisionTarget target, Object entity, byte[] entityId) {
         switch (target) {
             case MEMBER:
                 return Member.class.cast(entity);
@@ -125,7 +126,7 @@ public class RevisionHistoryModifiedEventListener implements PostInsertEventList
         }
     }
 
-    private Team getTargetTeam(RevisionTarget target, Object entity, String entityId) {
+    private Team getTargetTeam(RevisionTarget target, Object entity, byte[] entityId) {
         switch (target) {
             case TEAM:
                 return Team.class.cast(entity);

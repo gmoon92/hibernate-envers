@@ -1,6 +1,7 @@
 package com.moong.envers.revision.domain;
 
 import com.moong.envers.member.domain.Member;
+import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.types.RevisionEventStatus;
 import com.moong.envers.revision.types.RevisionTarget;
 import com.moong.envers.team.domain.Team;
@@ -44,7 +45,7 @@ public class RevisionHistoryModified {
 
     @Column(name = "entity_id", updatable = false, nullable = false)
     @Lob
-    private String entityId;
+    private byte[] entityId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target", updatable = false)
@@ -75,13 +76,11 @@ public class RevisionHistoryModified {
     @Builder
     private RevisionHistoryModified(RevisionHistory revision, Serializable entityId, RevisionTarget revisionTarget, RevisionType revisionType, RevisionEventStatus revisionEventStatus) {
         this.revision = revision;
-        this.entityId = revisionTarget.convertToRevisionEntityID(entityId);
+        this.entityId = RevisionConverter.serializedObject(entityId);
         this.revisionTarget = revisionTarget;
         this.revisionType = revisionType;
         this.revisionEventStatus = revisionEventStatus;
     }
-
-
 
 }
 

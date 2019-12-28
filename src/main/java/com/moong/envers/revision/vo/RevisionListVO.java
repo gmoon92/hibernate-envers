@@ -1,6 +1,7 @@
 package com.moong.envers.revision.vo;
 
 import com.moong.envers.common.vo.BaseSearchVO;
+import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.types.RevisionTarget;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
@@ -38,7 +39,7 @@ public class RevisionListVO {
         }
     }
 
-    @Getter
+    @Getter @ToString
     public static class DataVO implements Serializable {
         private final long serialVersionUID = 4214996561651068387L;
 
@@ -52,20 +53,20 @@ public class RevisionListVO {
 
         private RevisionTarget revisionTarget;
 
-        private String entityId;
+        private Object entityId;
 
         private String targetTeamName;
 
         private String targetMemberName;
 
         @QueryProjection
-        public DataVO(Long rev, Date revDate, String memberId, String memberName, RevisionTarget revisionTarget, String entityId, String targetTeamName, String targetMemberName) {
+        public DataVO(Long rev, Date revDate, String memberId, String memberName, RevisionTarget revisionTarget, byte[] entityId, String targetTeamName, String targetMemberName) {
             this.rev = rev;
             this.revDate = revDate;
             this.memberId = memberId;
             this.memberName = memberName;
             this.revisionTarget = revisionTarget;
-            this.entityId = entityId;
+            this.entityId = RevisionConverter.deSerializedObject(entityId);
             this.targetTeamName = targetTeamName;
             this.targetMemberName = targetMemberName;
         }
