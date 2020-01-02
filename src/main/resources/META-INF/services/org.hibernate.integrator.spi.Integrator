@@ -1,1 +1,1 @@
-com.moong.envers.common.config.JPAEventListenerIntegrator
+com.moong.envers.global.listener.JPAEventListenerIntegrator

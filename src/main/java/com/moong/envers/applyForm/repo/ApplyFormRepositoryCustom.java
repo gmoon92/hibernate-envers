@@ -15,8 +15,4 @@ import java.util.List;
  */
 interface ApplyFormRepositoryCustom {
     List<ApplyForm> findByApproveMember(Member approveMember);
-
-    void remove(ApplyForm applyForm);
-
-    void changeNotifiedApplyFormToOtherApplyForm(ApplyForm where, ApplyForm set);
 }

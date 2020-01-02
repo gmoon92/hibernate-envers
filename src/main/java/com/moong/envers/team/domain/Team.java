@@ -1,6 +1,6 @@
 package com.moong.envers.team.domain;
 
-import com.moong.envers.common.domain.BaseEntity;
+import com.moong.envers.global.domain.BaseTrackingEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -16,7 +16,7 @@ import javax.persistence.Id;
 @Getter
 @ToString @EqualsAndHashCode(of = {"id", "name"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Team extends BaseEntity {
+public class Team extends BaseTrackingEntity {
 
     @Id
     @GeneratedValue

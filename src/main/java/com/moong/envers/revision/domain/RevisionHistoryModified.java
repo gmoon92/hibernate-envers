@@ -1,9 +1,10 @@
 package com.moong.envers.revision.domain;
 
+import com.moong.envers.global.domain.BaseEntity;
 import com.moong.envers.member.domain.Member;
-import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.types.RevisionEventStatus;
 import com.moong.envers.revision.types.RevisionTarget;
+import com.moong.envers.revision.utils.RevisionConverter;
 import com.moong.envers.team.domain.Team;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -33,7 +34,7 @@ import java.io.Serializable;
 @ToString(of = { "id", "entityId", "revisionTarget", "revisionType", "revisionEventStatus" })
 @EqualsAndHashCode(of = { "revision", "entityId", "revisionTarget" })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RevisionHistoryModified {
+public class RevisionHistoryModified extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -73,7 +74,7 @@ public class RevisionHistoryModified {
     @Column(name = "target_team_name")
     private String targetTeamName;
 
-    @Builder
+    @Builder(access = AccessLevel.PRIVATE)
     private RevisionHistoryModified(RevisionHistory revision, Serializable entityId, RevisionTarget revisionTarget, RevisionType revisionType, RevisionEventStatus revisionEventStatus) {
         this.revision = revision;
         this.entityId = RevisionConverter.serializedObject(entityId);
@@ -81,6 +82,17 @@ public class RevisionHistoryModified {
         this.revisionType = revisionType;
         this.revisionEventStatus = revisionEventStatus;
     }
+
+    public static RevisionHistoryModified newInstance(RevisionHistory revision, Serializable entityId, RevisionTarget revisionTarget) {
+        return RevisionHistoryModified.builder()
+                .revision(revision)
+                .entityId(entityId)
+                .revisionTarget(revisionTarget)
+                .revisionEventStatus(RevisionEventStatus.WAIT)
+                .revisionType(RevisionType.MOD)
+                .build();
+    }
+
 
 }
 

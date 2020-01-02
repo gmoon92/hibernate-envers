@@ -1,7 +1,7 @@
 package com.moong.envers.revision.repo;
 
-import com.moong.envers.common.domain.BaseEntity;
-import com.moong.envers.revision.core.exception.RevisionHistoryException;
+import com.moong.envers.global.domain.BaseTrackingEntity;
+import com.moong.envers.revision.exception.RevisionHistoryException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.envers.AuditReader;
@@ -34,7 +34,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
 
     @Override
     @Transactional(readOnly = true)
-    public <T extends BaseEntity> Optional<T> findAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber) {
+    public <T extends BaseTrackingEntity> Optional<T> findAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber) {
         Object auditedEntity = null;
         try {
             auditedEntity = getAuditQuery()
@@ -55,7 +55,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
 
     @Override
     @Transactional(readOnly = true)
-    public <T extends BaseEntity> Optional<T> findAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber, RevisionType revisionType) {
+    public <T extends BaseTrackingEntity> Optional<T> findAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber, RevisionType revisionType) {
         Object auditedEntity = null;
         try {
             auditedEntity = getAuditQuery()
@@ -77,7 +77,7 @@ public class AuditedEntityRepositoryImpl implements AuditedEntityRepository{
 
     @Override
     @Transactional(readOnly = true)
-    public <T extends BaseEntity> Optional<T> findPreAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber) {
+    public <T extends BaseTrackingEntity> Optional<T> findPreAuditedEntity(Class<T> entityClass, Object entityId, Long revisionNumber) {
         T auditedEntity = null;
         try {
             auditedEntity = getAuditReader().find(entityClass, entityId, revisionNumber - 1);

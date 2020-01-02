@@ -2,7 +2,7 @@ package com.moong.envers.applyForm.domain;
 
 import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.approve.types.ApproveStatus;
-import com.moong.envers.common.domain.BaseEntity;
+import com.moong.envers.global.domain.BaseTrackingEntity;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
 import lombok.AccessLevel;
@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -53,7 +54,7 @@ import java.util.stream.Collectors;
 @ToString
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ApplyForm extends BaseEntity {
+public class ApplyForm extends BaseTrackingEntity {
 
     @Id
     @GeneratedValue
@@ -82,7 +83,7 @@ public class ApplyForm extends BaseEntity {
      *
      * @author moong
      */
-    @OneToMany(mappedBy = "applyForm")
+    @OneToMany(mappedBy = "applyForm", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Approve> approves = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
@@ -140,7 +141,7 @@ public class ApplyForm extends BaseEntity {
     }
 
     public ApplyForm notifyForApprover(Set<Approve> approves) {
-        approves.forEach(this::addNotifyForApprover);
+        approves.forEach(this::addApprove);
         return this;
     }
 
@@ -170,13 +171,12 @@ public class ApplyForm extends BaseEntity {
      * 트랜잭션이 끝이나면 dirty checking 이 되도록 설정하였다.
      * @author moong
      * */
-    public ApplyForm addNotifyForApprover(Approve approve) {
-        if (approve.getApplyForm() != null) {
-            approve.getApplyForm().getApproves()
-                    .remove(approve);
-        }
+    public void addApprove(Approve approve) {
+        ApplyForm applyForm = approve.getApplyForm();
+        if (applyForm != null)
+            applyForm.getApproves().remove(approve);
+
         approve.setApplyForm(this);
         this.approves.add(approve);
-        return this;
     }
 }

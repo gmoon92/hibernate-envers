@@ -1,8 +1,9 @@
 package com.moong.envers;
 
-import com.moong.envers.common.config.H2ServerConfig;
+import com.moong.envers.global.config.H2ServerConfig;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.member.repo.MemberRepository;
+import com.moong.envers.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,9 @@ class SpringBootH2IntegrationTest {
     @Test
     @Transactional
     void givenRepository_whenSaveAndRetrieveEntity() {
-        Member member = memberRepository.save(Member.builder().name("moon").build());
+        Team web1 = Team.newTeam("web1");
+        Member moon = Member.newMember("moon", "pa$$word", web1);
+        Member member = memberRepository.save(moon);
         Member findMember = memberRepository.findById(member.getId()).get();
 
         assertThat(member).isNotNull().isEqualTo(findMember);

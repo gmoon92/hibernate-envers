@@ -1,7 +1,7 @@
 package com.moong.envers.revision.domain;
 
-import com.moong.envers.revision.core.listener.RevisionHistoryListener;
-import com.moong.envers.revision.types.RevisionEventStatus;
+import com.moong.envers.global.domain.BaseEntity;
+import com.moong.envers.global.listener.CustomRevisionEntityListener;
 import com.moong.envers.revision.types.RevisionTarget;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -11,7 +11,6 @@ import lombok.ToString;
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
-import org.hibernate.envers.RevisionType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,12 +30,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "rev_history")
-@RevisionEntity(RevisionHistoryListener.class)
+@RevisionEntity(CustomRevisionEntityListener.class)
 @Getter
 @ToString(of = { "id", "createdDt", "updatedBy", "updatedByUsername" })
 @EqualsAndHashCode(of = { "id" }, exclude = { "modifiedEntities" })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RevisionHistory implements Serializable {
+public class RevisionHistory extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -67,14 +66,8 @@ public class RevisionHistory implements Serializable {
     @OneToMany(mappedBy = "revision", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private Set<RevisionHistoryModified> modifiedEntities = new HashSet<>();
 
-    public void addModifiedEntity(Serializable entityId, RevisionType revisionType, RevisionTarget revisionTarget, RevisionEventStatus eventStatus) {
-        modifiedEntities.add(RevisionHistoryModified.builder()
-                .revision(this)
-                .entityId(entityId)
-                .revisionEventStatus(eventStatus)
-                .revisionTarget(revisionTarget)
-                .revisionType(revisionType)
-                .build());
+    public void traceModifiedEntity(Serializable entityId, Class entityClass) {
+        modifiedEntities.add(RevisionHistoryModified.newInstance(this, entityId, RevisionTarget.of(entityClass)));
     }
 
     public LocalDateTime getRevisionCreatedDt() {
