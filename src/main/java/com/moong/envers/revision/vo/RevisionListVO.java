@@ -1,8 +1,8 @@
 package com.moong.envers.revision.vo;
 
-import com.moong.envers.common.vo.BaseSearchVO;
-import com.moong.envers.revision.core.utils.RevisionConverter;
+import com.moong.envers.global.vo.BaseSearchVO;
 import com.moong.envers.revision.types.RevisionTarget;
+import com.moong.envers.revision.utils.RevisionConverter;
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.Setter;

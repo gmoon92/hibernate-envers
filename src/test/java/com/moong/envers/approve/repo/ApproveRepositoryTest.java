@@ -3,7 +3,7 @@ package com.moong.envers.approve.repo;
 import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.approve.domain.QApprove;
 import com.moong.envers.approve.types.ApproveStatus;
-import com.moong.envers.common.config.BaseJPARepositoryTestCase;
+import com.moong.envers.global.config.BaseJPARepositoryTestCase;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.member.domain.QMember;
 import com.moong.envers.member.repo.MemberRepository;
@@ -42,11 +42,8 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
 
         team = teamRepository.save(Team.newTeam("web1"));
         team2 = teamRepository.save(Team.newTeam("web2"));
-        member = memberRepository.save(Member.builder()
-                .team(team)
-                .name("moon")
-                .build());
-        doEntityManagerFlushAndClear();
+        member = memberRepository.save(Member.newMember("moon", "pa$$word", team));
+        flushAndClear();
     }
 
 
@@ -78,7 +75,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
 //        N+1 발생
         Set<Approve> approveMembers = approveRepository.findByMember(member);
         log.info("approveMembers {} : {}", approveMembers.size(), approveMembers);
-        doEntityManagerFlushAndClear();
+        flushAndClear();
 
         log.info(">>>>>>>>>>>>>>>>>");
         log.info(">>>>>>>>>>>>>>>>>");
@@ -99,7 +96,7 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
     public void saveSampleApprove() {
         approveRepository.save(Approve.register(member, team));
         approveRepository.save(Approve.register(member, team2));
-        doEntityManagerFlushAndClear();
+        flushAndClear();
     }
 
     @Test
@@ -109,13 +106,13 @@ class ApproveRepositoryTest extends BaseJPARepositoryTestCase {
         Approve saveApprove = approveRepository.save(Approve.register(member, team));
         assertThat(saveApprove.getStatus())
                 .isEqualTo(ApproveStatus.WAIT);
-        doEntityManagerFlushAndClear();
+        flushAndClear();
 
 //      [2] Approve 상태 변경 Dirty checking 테스트
         Approve acceptApprove = changeApproveStatus(saveApprove.getId(), ApproveStatus.ASSENT);
         assertThat(acceptApprove.getStatus())
                 .isEqualTo(ApproveStatus.ASSENT);
-        doEntityManagerFlushAndClear();
+        flushAndClear();
 
         /**
          * Spring Data JPA의 findOne 메서드의 사용법이 변경되었다.

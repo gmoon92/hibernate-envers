@@ -1,6 +1,6 @@
 package com.moong.envers.member.domain;
 
-import com.moong.envers.common.domain.BaseEntity;
+import com.moong.envers.global.domain.BaseTrackingEntity;
 import com.moong.envers.team.domain.Team;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,7 +24,7 @@ import javax.persistence.ManyToOne;
 @Getter
 @ToString(exclude = {"team"}) @EqualsAndHashCode(of = {"id", "name"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member extends BaseEntity {
+public class Member extends BaseTrackingEntity {
 
     @Id
     @GeneratedValue
@@ -56,12 +56,20 @@ public class Member extends BaseEntity {
     @NotAudited
     private Team team;
 
-    @Builder
+    @Builder(access = AccessLevel.PROTECTED)
     private Member(String name, String password, Integer age, Team team) {
         this.name = name;
         this.password = password;
         this.age = age;
         this.team = team;
+    }
+
+    public static Member newMember(String name, String password, Team team) {
+        return Member.builder()
+                .name(name)
+                .password(password)
+                .team(team)
+                .build();
     }
 
     public Member changePassword(String password) {

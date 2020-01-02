@@ -1,6 +1,6 @@
 package com.moong.envers.revision.repo;
 
-import com.moong.envers.common.utils.DateUtils;
+import com.moong.envers.global.utils.DateUtils;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.revision.domain.RevisionHistoryModified;
 import com.moong.envers.revision.types.RevisionEventStatus;

@@ -1,10 +1,10 @@
 package com.moong.envers.revision.repo;
 
-import com.moong.envers.common.config.BaseDataSettings;
-import com.moong.envers.common.config.BaseServiceTestCase;
+import com.moong.envers.global.config.BaseRevisionTestConfig;
+import com.moong.envers.global.config.BaseServiceTestCase;
 import com.moong.envers.member.domain.Member;
-import com.moong.envers.revision.core.utils.RevisionConverter;
 import com.moong.envers.revision.types.RevisionTarget;
+import com.moong.envers.revision.utils.RevisionConverter;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
-import static com.moong.envers.common.constants.Profiles.Constants.TEST;
-import static com.moong.envers.common.constants.Profiles.Constants.TEST_REV;
+import static com.moong.envers.global.constants.Profiles.Constants.TEST;
+import static com.moong.envers.global.constants.Profiles.Constants.TEST_REV;
 import static com.moong.envers.member.domain.QMember.member;
 import static com.moong.envers.revision.domain.QRevisionHistoryModified.revisionHistoryModified;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ActiveProfiles(value = { TEST, TEST_REV })
-@Import( { BaseDataSettings.class})
+@Import( { BaseRevisionTestConfig.class})
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 class AuditedEntityRepositoryImplTest extends BaseServiceTestCase {
 

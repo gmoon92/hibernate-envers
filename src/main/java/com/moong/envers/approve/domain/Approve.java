@@ -2,7 +2,7 @@ package com.moong.envers.approve.domain;
 
 import com.moong.envers.applyForm.domain.ApplyForm;
 import com.moong.envers.approve.types.ApproveStatus;
-import com.moong.envers.common.domain.BaseEntity;
+import com.moong.envers.global.domain.BaseTrackingEntity;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.team.domain.Team;
 import lombok.AccessLevel;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @ToString(exclude = {"member", "team", "applyForm"})
 @EqualsAndHashCode(of = {"member", "team"}, exclude = {"id"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Approve extends BaseEntity {
+public class Approve extends BaseTrackingEntity {
 
     @EmbeddedId
     private Id id;

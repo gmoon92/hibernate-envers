@@ -1,10 +1,11 @@
 package com.moong.envers.revision.types;
 
-import com.moong.envers.common.domain.BaseEntity;
-import com.moong.envers.common.vo.EntityCompareVO;
+import com.moong.envers.global.domain.BaseTrackingEntity;
+import com.moong.envers.global.vo.EntityCompareVO;
 import com.moong.envers.member.domain.Member;
-import com.moong.envers.member.vo.MemberCompareVO;
-import com.moong.envers.revision.core.utils.RevisionConverter;
+import com.moong.envers.revision.utils.RevisionConverter;
+import com.moong.envers.revision.vo.compare.MemberCompareVO;
+import com.moong.envers.team.domain.Team;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
@@ -15,24 +16,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RevisionTargetTest {
 
     @Test
-    void testOfCompareVO() {
-        Member entity = Member.builder()
-                .name("member1")
-                .age(1)
-                .build();
-        MemberCompareVO compareVO1 = RevisionConverter.ofCompareVO(entity, MemberCompareVO.class);
-        MemberCompareVO compareVO2 = (MemberCompareVO) RevisionTarget.MEMBER.ofCompareVO(entity);
+    void testGetCompareVO() {
+        Team web1 = Team.newTeam("web1");
+        Member moon = Member.newMember("member1", "pa$$word", web1);
+        MemberCompareVO compareVO1 = RevisionConverter.convertTo(moon, MemberCompareVO.class);
+        MemberCompareVO compareVO2 = (MemberCompareVO) RevisionTarget.MEMBER.getCompareVO(moon);
 
         log.info("compareVO1 {}", compareVO1);
         assertThat(compareVO1.getName())
                 .isEqualTo(compareVO2.getName())
-                .isEqualTo(entity.getName());
+                .isEqualTo(moon.getName());
 
         assertThat(compareVO1)
                 .isEqualTo(compareVO2);
     }
 
-    private <T extends BaseEntity, R extends EntityCompareVO> R newInstanceCompareVO(T entity, Class<R> compareVOClass) {
+    private <T extends BaseTrackingEntity, R extends EntityCompareVO> R convertTo(T entity, Class<R> compareVOClass) {
         Object compareVO = null;
         try {
             compareVO = compareVOClass.newInstance();
