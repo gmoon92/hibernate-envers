@@ -2,6 +2,8 @@ package com.moong.envers.service;
 
 import com.moong.envers.applyForm.domain.ApplyForm;
 import com.moong.envers.applyForm.repo.ApplyFormRepository;
+import com.moong.envers.applyForm.vo.ApplyFormVO;
+import com.moong.envers.approve.domain.Approve;
 import com.moong.envers.approve.repo.ApproveRepository;
 import com.moong.envers.member.domain.Member;
 import com.moong.envers.member.repo.MemberRepository;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Optional;
 
 
@@ -52,21 +55,68 @@ class ApplyFormServiceTest {
 
     private ApplyForm applyForm;
 
+    private Team web1;
+
+    private Member moon;
+
+    private Member lee;
+
+    private ApplyFormVO applyFormVO;
+
     @BeforeEach
     void init() {
-        Team web1 = Team.newTeam("web1");
-        Member moon = Member.newMember("moon", "pa$$word", web1);
+        web1 = Team.newTeam("web1");
+        moon = Member.newMember("moon", "pa$$word", web1);
+        lee = Member.newMember("lee", "pa$$word", web1);
         applyForm = ApplyForm.write(moon, web1);
+        applyForm.addApprove(Approve.register(lee, web1));
+
+        applyFormVO = new ApplyFormVO();
+        applyFormVO.setApplyTeamName(web1.getName());
+        applyFormVO.setApplyUserName(moon.getName());
+    }
+
+    @Test
+    @DisplayName("승인자 조회")
+    void testGetApprovers() {
+        Mockito.when(applyFormRepository.findByMember(moon)).thenReturn(Collections.singletonList(applyForm));
+
+        applyFormService.getApprovers(applyForm);
+
+        Mockito.verify(applyFormRepository).findByMember(moon);
     }
 
     @Test
     @DisplayName("신청서 삭제")
-    void testRemove() {
+    void testRemoveA() {
         long applyFormId = 1L;
         Mockito.when(applyFormRepository.findById(applyFormId)).thenReturn(Optional.of(applyForm));
 
         applyFormService.removeApplyForm(applyFormId);
 
         Mockito.verify(applyFormRepository).delete(applyForm);
+    }
+
+    @Test
+    @DisplayName("신청서 작성")
+    void testWriteApplyForm() {
+        Mockito.when(teamRepository.findByName(applyFormVO.getApplyTeamName())).thenReturn(Optional.of(web1));
+        Mockito.when(memberRepository.findByName(applyFormVO.getApplyUserName())).thenReturn(Optional.of(moon));
+
+        applyFormService.writeApplyForm(applyFormVO);
+
+        Mockito.verify(applyFormRepository).save(ApplyForm.write(moon, web1, applyFormVO.getContent()));
+    }
+
+    @Test
+    @DisplayName("모든 부서에 대해 신청서 작성")
+    void testWriteApplyFormByAllTeam() {
+        Mockito.when(teamRepository.findAll()).thenReturn(Collections.singletonList(web1));
+        Mockito.when(memberRepository.findByName(applyFormVO.getApplyUserName())).thenReturn(Optional.of(moon));
+        Mockito.when(approveRepository.findByTeam(web1)).thenReturn(Collections.singleton(Approve.register(lee, web1)));
+
+        applyFormService.writeApplyFormByAllTeam(applyFormVO);
+
+        Mockito.verify(applyFormRepository).save(ApplyForm.write(moon, web1, applyFormVO.getContent()));
     }
 }

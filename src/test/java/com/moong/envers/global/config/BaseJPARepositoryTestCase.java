@@ -32,7 +32,7 @@ public abstract class BaseJPARepositoryTestCase extends BaseTestCase {
     }
 
     protected void flushAndClear() {
-        log.trace("Do action Entity manager flush and clear...");
+        log.info("Call flush and clear...");
         em.flush();
         em.clear();
     }

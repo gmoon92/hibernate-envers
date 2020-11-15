@@ -13,6 +13,6 @@ import static org.springframework.test.context.TestConstructor.AutowireMode.ALL;
  * @author moong
  * */
 @TestConstructor(autowireMode = ALL)
-public abstract class BaseTestCase {
+abstract class BaseTestCase {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 }

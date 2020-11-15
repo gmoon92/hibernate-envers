@@ -10,7 +10,6 @@ import com.moong.envers.team.domain.Team;
 import com.moong.envers.team.repo.TeamRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,11 +56,10 @@ import static java.util.Arrays.asList;
  *
  * @author moong
  */
-@Slf4j
 @Profile(value = TEST_REV)
 @Configuration
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class BaseRevisionTestConfig {
+public class BaseRevisionTestConfig extends BaseTestCase{
 
     private final MemberRepository memberRepository;
     private final TeamRepository teamRepository;
