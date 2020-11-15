@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,10 +30,11 @@ public class ApplyFormService {
 
     private final ApproveRepository approveRepository;
 
-    public Set<Approve> findApprovers(ApplyForm applyForm) {
+    public Set<Approve> getApprovers(ApplyForm applyForm) {
         return applyFormRepository.findByMember(applyForm.getMember()).stream()
                 .map(ApplyForm::getApproves)
                 .flatMap(Collection::stream)
+                .peek(approve -> log.debug("applyForm approver name : {}", approve.getMember().getName()))
                 .collect(Collectors.toSet());
     }
 
@@ -51,24 +51,24 @@ public class ApplyFormService {
      *        2. 신청자를 SecurityContext 에 등록된 로그인 유저로 대체
      * @author moong
      * */
-    public void writeApplyForm(ApplyFormVO ApplyFormVO) {
-        Optional<Team> team = teamRepository.findByName(ApplyFormVO.getApplyTeamName());
-        team.ifPresent(applyTeam -> {
-            Member applyMember = memberRepository.findByName(ApplyFormVO.getApplyUserName())
-                    .orElseGet(() -> {throw new RuntimeException(String.format("[Error] Find not Member by username : %s", ApplyFormVO.getApplyUserName()));});
-            applyFormRepository.save(ApplyForm.write(applyMember, applyTeam, ApplyFormVO.getContent()));
-        });
+    public void writeApplyForm(ApplyFormVO applyFormVO) {
+        teamRepository.findByName(applyFormVO.getApplyTeamName())
+                .ifPresent(applyTeam -> writeApplyForm(applyFormVO, applyTeam));
     }
 
-    public void writeApplyFormByAllTeam(ApplyFormVO ApplyFormVO) {
-        teamRepository.findAll().forEach(applyTeam -> {
-            Member applyMember = memberRepository.findByName(ApplyFormVO.getApplyUserName())
-                    .orElseGet(() -> {throw new RuntimeException(String.format("[Error] Find not Member by username : %s", ApplyFormVO.getApplyUserName()));});
+    public void writeApplyFormByAllTeam(ApplyFormVO applyFormVO) {
+        teamRepository.findAll().forEach(applyTeam -> writeApplyForm(applyFormVO, applyTeam));
+    }
 
-            Set<Approve> approves = approveRepository.findByTeam(applyTeam);
-            applyFormRepository.save(ApplyForm.write(applyMember, applyTeam, ApplyFormVO.getContent()))
-                    .notifyForApprover(approves);
-        });
+    private void writeApplyForm(ApplyFormVO applyFormVO, Team applyTeam) {
+        String applyUserName = applyFormVO.getApplyUserName();
+        Member applyMember = memberRepository.findByName(applyUserName)
+                .orElseThrow(() -> new RuntimeException(String.format("Not found apply member about applyForm... username : %s", applyUserName)));
+
+        Set<Approve> approves = approveRepository.findByTeam(applyTeam);
+        ApplyForm writeApplyForm = ApplyForm.write(applyMember, applyTeam, applyFormVO.getContent())
+                .notifyForApprover(approves);
+        applyFormRepository.save(writeApplyForm);
     }
 
 
